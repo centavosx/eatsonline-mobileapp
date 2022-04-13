@@ -17,23 +17,20 @@ Steps To contribute:
   
 **NEW FEATURE OR FUNCTIONALITY**
 
-- git push feature/[feature-name]
+- git push feature/[feature-name]  ex: git push feature/login
 
-ex: git push feature/login
 
 **FIXING BUG OR AN ERROR**
 
-- git push hotfix/[error/bug]
-
-ex: git push hotfix/loading
+- git push hotfix/[error/bug]  ex: git push hotfix/loading
 
 **FOR RESOLVING ISSUES**
 
 - git push [issue_number]-[issue_name]
 
-#1 HELLO WORLD
+  #1 HELLO WORLD
 
-ex: 1-hello_world
+  ex: 1-hello_world
 
 
 <h3>Software Development Tools</h3>
