@@ -19,10 +19,13 @@ Steps To contribute:
 
 - git push feature/[feature-name]
 
+ex: git push feature/login
 
 **FIXING BUG OR AN ERROR**
 
-- git push hotfix/[error/bug] 
+- git push hotfix/[error/bug]
+
+ex: git push hotfix/loading
 
 **FOR RESOLVING ISSUES**
 
