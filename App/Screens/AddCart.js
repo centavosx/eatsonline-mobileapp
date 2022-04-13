@@ -4,6 +4,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import food from '../Components/Food';
 import { PrimaryButton } from '../Components/Button';
 
+
 const AddCart = ({ navigation }) => {
     const CartCard = ({ item }) => {
         return (
@@ -47,7 +48,10 @@ const AddCart = ({ navigation }) => {
                             <Text style={{ fontSize: 18, fontWeight: 'bold' }}>₱550</Text>
                         </View>
                         <View style={{ marginHorizontal: 30 }}>
-                            <PrimaryButton title='CHECKOUT' />
+                            <PrimaryButton 
+                            title='CHECKOUT' 
+                            onPress={() => navigation.navigate('Checkout')}
+                            />
                         </View>
                     </View>
                 )}

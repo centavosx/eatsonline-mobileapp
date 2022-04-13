@@ -9,6 +9,7 @@ import RegisterScreen from './App/Screens/Registration';
 import OnBoardScreen from './App/Screens/OnBoard';
 import ProductScreen from './App/Screens/ProductDetails';
 import AddCartScreen from './App/Screens/AddCart';
+import Checkout from './App/Screens/Checkout';
 import Navigation from './App/Navigation/Navigation';
 
 const NavigationStack = createStackNavigator();
@@ -23,6 +24,7 @@ const App = () => {
         <NavigationStack.Screen name='Register' component={RegisterScreen} options={{ headerShown: false }} />
         <NavigationStack.Screen name='Product' component={ProductScreen} options={{ headerShown: false }} />
         <NavigationStack.Screen name='AddCart' component={AddCartScreen} options={{ headerShown: false }} />
+        <NavigationStack.Screen name='Checkout' component={Checkout} options={{ headerShown: false }} />
       </NavigationStack.Navigator>
     </NavigationContainer>
   )

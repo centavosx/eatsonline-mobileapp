@@ -31,7 +31,7 @@ export default OnBoard;
 const styles = StyleSheet.create({
     SafeArea: {
         flex: 1,
-        backgroundColor: 'white'
+        backgroundColor: '#d6faf4'
 
     },
 
