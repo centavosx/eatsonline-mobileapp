@@ -24,6 +24,14 @@ Steps To contribute:
 
 - git push hotfix/[error/bug] 
 
+**FOR RESOLVING ISSUES**
+
+- git push [issue_number]-[issue_name]
+
+#1 HELLO WORLD
+
+ex: 1-hello_world
+
 
 <h3>Software Development Tools</h3>
 - NodeJS
