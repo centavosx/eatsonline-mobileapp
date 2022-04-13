@@ -1,10 +1,8 @@
-# eatsonline-mobileapp
-Eats Online Mobile app
-  
-  
-<img src="https://user-images.githubusercontent.com/72075830/163156968-a081c6ed-932d-42d2-a0ca-c7cb2f1a99cb.png" width="280" height="280" style="background-color:transparent;">
+# EATS ONLINE MOBILE APPLICATION
 
-Mobile app for Eats Online PH
+# <img src="http://www.eatsonlineph.com/assets/img/eatsonlinelogo.png" width="280" height="280" style="background-color:transparent;">
+
+<h3>Mobile app for Eats Online PH</h3>
 
 Website: http://eats-onlineph.herokuapp.com
 
@@ -25,4 +23,14 @@ Steps To contribute:
 **FIXING BUG OR AN ERROR**
 
 - git push hotfix/[error/bug] 
+
+
+<h3>Software Development Tools</h3>
+- NodeJS
+- JavaScript (React-Native)
+- Expo
+
+
+<h3>To start</h3>
+- npm start or expo start
 
