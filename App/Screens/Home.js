@@ -11,10 +11,11 @@ const cardWidth = screenWidth / 2 - 20;
 
 const Home = ({ navigation }) => {
     const [selectedCategoryIndex, setSelectedCategoryIndex] = React.useState(0);
+    
     const Card = ({ food }) => {
         return (
             <TouchableHighlight
-                underlayColor={'white'}
+                underlayColor={'#2aece3'}
                 activeOpacity={0.9}
                 onPress={() => navigation.navigate('Product', food)}>
                 <View style={styles.card}>
@@ -86,7 +87,7 @@ const Home = ({ navigation }) => {
                 <View>
                     <View style={{ flexDirection: 'row' }}>
                         <Text style={styles.Text}>Hello, </Text>
-                        <Text style={styles.UserText}>Johnrich </Text>
+                        <Text style={styles.UserText}>Jichuu</Text>
                     </View>
                     <Text style={styles.TextIntro}>What do you want for today?</Text>
                 </View>

@@ -8,7 +8,7 @@
     "splash": {
       "image": "./assets/EatsOnlineBG.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#d6faf4"
     },
     "updates": {
       "fallbackToCacheTimeout": 0

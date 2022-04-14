@@ -1,32 +1,60 @@
 import React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, TextInput } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, TextInput,ScrollView, Image } from 'react-native'
+import { ScreenStackHeaderBackButtonImage } from 'react-native-screens';
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import { PrimaryButton } from '../Components/Button';
 
 const Profile = ({ navigation }) => {
     return (
-        <SafeAreaView style={{ backgroundColor: 'white' }}>
+        <SafeAreaView style={styles.SafeArea}>
             <View style={styles.header}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Profile</Text>
                 <Icon name='shopping-cart' style={styles.cart} onPress={() => navigation.navigate('AddCart')} />
                 <Icon name='forum' style={styles.message} />
             </View>
             <View style={styles.body}>
-                <Icon name='account-circle' style={styles.user} />
+                <Image style={styles.user} source={require('../../assets/j2.jpg')} />
                 <View style={styles.InputContainer} >
-                    <Text style={styles.Login} onPress={() => navigation.navigate('Login')} >Login</Text>
+                    <Text style={styles.Login} onPress={() => navigation.navigate('Login')} >Edit</Text>
                 </View>
                 <View style={styles.sortBtn}>
-                    <Text style={styles.Signup} onPress={() => navigation.navigate('Register')}>Sign Up</Text>
-                </View>
+                    <Text style={styles.Signup} onPress={() => navigation.navigate('Register')}>Logout</Text>
+                </View>                
             </View>
+ 
+            <ScrollView
+            style={{flex:1, padding: 20}}
+            contentContainerStyle={{justifyContent: 'center', alignItems: 'center'}}
+            showsVerticalScrollIndicator={false}
+            >
+                <View style={styles.card}>
+                <Image style={styles.userImg} source={require('../../assets/j2.jpg')} />
+                <Text style={styles.userName} > Jichuu</Text>
+                <Text style={styles.aboutUser} > 
+                    ImNotScary@gmail.com
+                </Text>
+                </View>
 
+                <View style={styles.card}>
+                    <Text style={styles.userName}>Order Here</Text>
+                    <Text style={styles.result}> Kalamares</Text>
+                    <Text style={styles.result}> Kangkong</Text>
+                    <Text style={styles.result}> Sibuyas</Text>
+                    <Text style={styles.result}> Petchay</Text>
+                </View>
+
+            </ScrollView>
+       
         </SafeAreaView>
 
     )
 }
 export default Profile;
 const styles = StyleSheet.create({
+    SafeArea: {
+        flex: 1,
+        backgroundColor: '#d6faf4',
+    },
     forgotButton: {
         marginVertical: 35,
     },
@@ -50,10 +78,14 @@ const styles = StyleSheet.create({
         fontSize: 28,
         marginLeft: 10,
     },
-    user: {
-        fontSize: 70,
+    user: { 
         marginTop: -10,
-        marginLeft: -10,
+        marginLeft: 15,
+        height: 50,
+        width: 50,
+        borderRadius: 25,
+        borderWidth: 2,
+        borderColor: '#2aece3',  
     },
     InputContainer: {
         flex: 1,
@@ -88,4 +120,50 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingHorizontal: 20,
     },
+    userImg: {
+        height: 150,
+        width: 150,
+        borderRadius: 75,
+        borderWidth: 2,
+        borderColor: '#000000',  
+      },
+      userName: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        marginTop: 10,
+        marginBottom: 12,
+        color: '#000000',
+      },
+      aboutUser: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+        marginBottom: 10,
+        color: '#000000',
+      },
+      card:{
+        alignItems: 'center',
+        backgroundColor: 'rgba(234,236,49, .8)',
+        width: "100%",
+        marginBottom: 20,
+        borderRadius:10,
+        paddingBottom: 8,
+        paddingTop: 8
+      },
+      userName: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        marginTop: 0,
+        marginBottom: 8,
+        color: 'black',
+        textAlign: 'center'
+      },
+      result: {
+        fontSize: 12,
+        textAlign:'justify',
+        marginBottom: 10,
+        color: 'black',
+        marginLeft: '10%',
+        marginRight: '10%'
+      },
 });
