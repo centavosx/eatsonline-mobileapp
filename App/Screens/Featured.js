@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
           flex: 1,
           backgroundColor: 'transparent',
           borderRadius: 8,
+          padding: 10
       },
       sliderImage: {
           height: 150,
