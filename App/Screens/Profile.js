@@ -10,7 +10,7 @@ const Profile = ({ navigation }) => {
             <View style={styles.header}>
                 <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Profile</Text>
                 <Icon name='shopping-cart' style={styles.cart} onPress={() => navigation.navigate('AddCart')} />
-                <Icon name='forum' style={styles.message} />
+                <Icon name='forum' style={styles.message} onPress={() => navigation.navigate('SupportChat')} />
             </View>
             <View style={styles.body}>
                 <Image style={styles.user} source={require('../../assets/j2.jpg')} />
