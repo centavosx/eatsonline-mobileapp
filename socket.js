@@ -1,5 +1,5 @@
 import io from 'socket.io-client'
-const socket = io(process.env.REACT_APP_APIU, {
+const socket = io('ws://eats-apionline.herokuapp.com', {
   transports: ['websocket', 'polling'],
 })
 

@@ -1,218 +1,333 @@
-import React from 'react'
-import 'react-native-gesture-handler';
-import { View, SafeAreaView, Text, TouchableOpacity, StyleSheet, Image } from 'react-native'
-import { FlatList, ScrollView, TextInput, TouchableHighlight } from 'react-native-gesture-handler';
-import Icon from 'react-native-vector-icons/MaterialIcons';
-import categories from '../Components/Categories';
-import food from '../Components/Food';
-import { screenWidth } from '../Components/Dimension';
+import React, { useState } from 'react'
+import 'react-native-gesture-handler'
+import {
+  View,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+} from 'react-native'
+import Swiper from 'react-native-swiper'
+import Entypo from 'react-native-vector-icons/Entypo'
+import { addCart } from './Featured'
+import {
+  FlatList,
+  ScrollView,
+  TextInput,
+  TouchableHighlight,
+} from 'react-native-gesture-handler'
+import Icon from 'react-native-vector-icons/MaterialIcons'
+import categories from '../Components/Categories'
+import food from '../Components/Food'
+import { screenWidth } from '../Components/Dimension'
+import axios from 'axios'
+import socket from '../../socket'
+import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
 
-const cardWidth = screenWidth / 2 - 20;
+const cardWidth = screenWidth / 2 - 20
 
-const Home = ({ navigation }) => {
-    const [selectedCategoryIndex, setSelectedCategoryIndex] = React.useState(0);
-    
-    const Card = ({ food }) => {
-        return (
-            <TouchableHighlight
-                underlayColor={'#2aece3'}
-                activeOpacity={0.9}
-                onPress={() => navigation.navigate('Product', food)}>
-                <View style={styles.card}>
-                    <View style={{ alignItems: 'center', top: -40 }}>
-                        <Image source={food.image} style={{ height: 120, width: 120 }} />
-                    </View>
-                    <View style={{ marginHorizontal: 20 }}>
-                        <Text style={{ fontSize: 17, fontWeight: 'bold', marginTop: -20, }}>{food.name}</Text>
-                        <Text style={{ fontSize: 14, color: 'grey', marginTop: 2, }}>{food.ingredients}</Text>
-                    </View>
-                    <View style={{
-                        marginTop: 10,
-                        marginHorizontal: 20,
-                        flexDirection: 'row',
-                        justifyContent: 'space-between',
-                    }}>
-                        <Text style={{ fontSize: 18, fontWeight: 'bold' }}>{food.price}</Text>
-                        <View style={styles.addToCardBtn}>
-                            <Icon name='add' size={25} color={'white'} />
-                        </View>
-                    </View>
-                </View>
-            </TouchableHighlight>
-        )
-    };
-    const ListCategories = () => {
-        return (
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.contentContainerStyle}>
-                {categories.map((category, index) => (
-                    <TouchableOpacity
-                        key={index}
-                        activeOpacity={0.8}
-                        onPress={() => setSelectedCategoryIndex(index)}>
-                        <View style={{
-                            backgroundColor:
-                                selectedCategoryIndex == index
-                                    ? '#eaec31'
-                                    : '#E5E6A1',
-                            ...styles.categoryBtn,
-                        }}>
-                            <View style={styles.categoryBtnImgCon}>
-                                <Image
-                                    source={category.image}
-                                    style={{ height: 25, width: 25, resizeMode: 'cover' }}
-                                />
-                            </View>
-                            <Text style={{
-                                fontSize: 12,
-                                fontWeight: 'bold',
-                                marginLeft: 10,
-                                color:
-                                    selectedCategoryIndex == index
-                                        ? 'black'
-                                        : 'grey',
-                            }}>{category.name}</Text>
-                        </View>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
-        )
-    };
-    //---------------------------USER INTERFACE--------------------------------
-    return (
-        <SafeAreaView style={styles.SafeArea}>
-            <View style={styles.header}>
-                <View>
-                    <View style={{ flexDirection: 'row' }}>
-                        <Text style={styles.Text}>Hello, </Text>
-                        <Text style={styles.UserText}>Jichuu</Text>
-                    </View>
-                    <Text style={styles.TextIntro}>What do you want for today?</Text>
-                </View>
-                <Image style={styles.UserImage} source={require('../../assets/EOLogoYellowGlow.png')} />
-            </View>
-            <View style={styles.body}>
-                <View style={styles.InputContainer}>
-                    <Icon name="search" size={30} />
-                    <TextInput style={styles.search} placeholder="Search for food" />
-                </View>
-                <View style={styles.sortBtn}>
-                    <Icon name="tune" size={30} color={'#2aece3'} />
-                </View>
-            </View>
-            <View>
-                <ListCategories />
-            </View>
-            {/*------------------SCROLL VIEW------------------*/}
-            <FlatList
-                showsVerticalScrollIndicator={false}
-                numColumns={2}
-                data={food}
-                renderItem={({ item }) => <Card food={item} />}
-            />
-        </SafeAreaView>
+const Home = ({ navigation, cart }) => {
+  const [selectedCategoryIndex, setSelectedCategoryIndex] = React.useState(0)
+  const [products, setProducts] = useState([])
+  React.useEffect(async () => {
+    const resp = await axios.get(
+      'https://eats-apionline.herokuapp.com/api/v1/getData',
+      {
+        params: {
+          data: JSON.stringify(
+            encryptJSON({
+              reference: 'products',
+              sortwhat: 'totalsold',
+              index: [0, 6],
+            })
+          ),
+        },
+      }
     )
-};
-export default Home;
+    resp.data = decryptJSON(resp.data.data)
+    if (!resp.data.error) {
+      setProducts(resp.data.data)
+    }
+
+    socket.on('featured', (data) => {
+      setProducts(data)
+    })
+  }, [])
+
+  const createStars = (n) => {
+    let v = []
+    for (let x = 1; x <= 5; x++) {
+      if (x <= n) {
+        v.push(<Entypo name="star" key={x} size={10} color="#e1ad01" />)
+      } else {
+        v.push(<Entypo name="star" key={x} size={10} color="grey" />)
+      }
+    }
+    return (
+      <View
+        style={{ flexDirection: 'row', marginTop: -25, marginHorizontal: 20 }}
+      >
+        {v.map((d) => d)}
+      </View>
+    )
+  }
+
+  const Card = ({ food, id }) => {
+    return (
+      <View style={styles.card}>
+        <View style={{ alignItems: 'center', top: -40 }}>
+          <TouchableHighlight
+            underlayColor={'#2aece3'}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('Product', food)}
+          >
+            <Image
+              source={{ uri: food.link }}
+              style={{ height: 120, width: 120, borderRadius: 10 }}
+            />
+          </TouchableHighlight>
+          {food.discount ? (
+            <View
+              style={{
+                marginHorizontal: '35%',
+                backgroundColor: 'red',
+                borderRadius: 5,
+                padding: 2,
+                position: 'absolute',
+                top: -8,
+                borderColor: 'black',
+                borderWidth: 1,
+              }}
+            >
+              <Text
+                style={{ color: 'white', fontSize: 10, textAlign: 'center' }}
+              >
+                {food.discount}%
+              </Text>
+            </View>
+          ) : null}
+          {cart.includes(decrypt(id)) ? (
+            <View
+              style={{
+                marginHorizontal: '35%',
+                backgroundColor: '#d6faf4',
+                borderRadius: 5,
+                padding: 2,
+                position: 'absolute',
+                bottom: -8,
+                borderColor: 'black',
+                borderWidth: 1,
+              }}
+            >
+              <Text
+                style={{ color: 'black', fontSize: 10, textAlign: 'center' }}
+              >
+                CART
+              </Text>
+            </View>
+          ) : null}
+        </View>
+        {createStars(food.comments ?? 0)}
+        <View style={{ marginHorizontal: 20 }}>
+          <Text style={{ fontSize: 17, fontWeight: 'bold' }}>{food.title}</Text>
+          <Text style={{ fontSize: 14, color: 'grey', marginTop: 2 }}>
+            {food.seller}
+          </Text>
+        </View>
+        <View
+          style={{
+            marginTop: 10,
+            marginHorizontal: 20,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            position: 'absolute',
+            bottom: 10,
+          }}
+        >
+          <Text style={{ fontSize: 18, fontWeight: 'bold', width: '60%' }}>
+            {Number(food.price).toFixed(2)}
+          </Text>
+          <View style={styles.addToCardBtn}>
+            <TouchableHighlight
+              underlayColor={'#2aece3'}
+              activeOpacity={0.9}
+              onPress={async () => await addCart(id)}
+            >
+              <Icon name="add" size={25} color={'white'} />
+            </TouchableHighlight>
+          </View>
+        </View>
+      </View>
+    )
+  }
+
+  //---------------------------USER INTERFACE--------------------------------
+  return (
+    <View style={{ flex: 1, backgroundColor: '#d6faf4' }}>
+      <View style={styles.header}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Home</Text>
+      </View>
+      <View style={styles.slider}>
+        <View style={styles.sliderContainer}>
+          <Swiper
+            height={'100%'}
+            autoplay
+            activeDotColor="red"
+            dotColor="#2aece3"
+          >
+            {products.map((food, index) => (
+              <View style={styles.slide} key={index}>
+                <Image
+                  style={styles.sliderImage}
+                  resizeMode="cover"
+                  source={{ uri: food[1].link }}
+                />
+              </View>
+            ))}
+          </Swiper>
+        </View>
+      </View>
+      <View style={styles.body}>
+        <Text style={styles.UserText}>Featured Products</Text>
+      </View>
+
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        style={{ flex: 0.4 }}
+        numColumns={2}
+        data={products}
+        renderItem={({ item }, i) => (
+          <Card food={item[1]} key={i} id={item[0]} />
+        )}
+      />
+    </View>
+  )
+}
+export default Home
 
 const styles = StyleSheet.create({
-    SafeArea: {
-        flex: 1,
-        backgroundColor: '#d6faf4',
-    },
-    header: {
-        marginTop: 40,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 20,
-    },
-    Text: {
-        fontSize: 25,
-    },
-    UserText: {
-        fontSize: 25,
-        fontWeight: 'bold',
-        marginLeft: 5,
-    },
-    TextIntro: {
-        marginTop: 5,
-        fontSize: 18,
-        color: 'grey',
-    },
-    UserImage: {
-        height: 70,
-        width: 70,
-        borderRadius: 25,
-    },
-    body: {
-        marginTop: 40,
-        flexDirection: 'row',
-        paddingHorizontal: 20,
-    },
-    InputContainer: {
-        flex: 1,
-        height: 50,
-        borderRadius: 10,
-        flexDirection: 'row',
-        backgroundColor: '#2aece3',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-    },
-    search: {
-        flex: 1,
-        fontSize: 18,
-        paddingHorizontal: 5,
-    },
-    sortBtn: {
-        width: 50,
-        height: 50,
-        marginLeft: 10,
-        backgroundColor: '#eaec31',
-        borderRadius: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    contentContainerStyle: {
-        paddingVertical: 30,
-        alignItems: 'center',
-        paddingHorizontal: 20,
-    },
-    categoryBtn: {
-        height: 50,
-        width: 150,
-        marginRight: 7,
-        borderRadius: 30,
-        alignItems: 'center',
-        paddingHorizontal: 5,
-        flexDirection: 'row',
-    },
-    categoryBtnImgCon: {
-        height: 35,
-        width: 35,
-        backgroundColor: 'white',
-        borderRadius: 30,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    card: {
-        height: 220,
-        width: cardWidth,
-        marginHorizontal: 10,
-        marginBottom: 20,
-        marginTop: 50,
-        borderRadius: 15,
-        elevation: 13,
-        backgroundColor: 'white',
-    },
-    addToCardBtn: {
-        height: 40,
-        width: 40,
-        borderRadius: 20,
-        marginLeft: 15,
-        backgroundColor: '#eaec31',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-});
+  SafeArea: {
+    flex: 1,
+    backgroundColor: '#d6faf4',
+  },
+  header: {
+    marginTop: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+  },
+  Text: {
+    fontSize: 25,
+  },
+  UserText: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    marginLeft: 5,
+  },
+  TextIntro: {
+    marginTop: 5,
+    fontSize: 18,
+    color: 'grey',
+  },
+  UserImage: {
+    height: 70,
+    width: 70,
+    borderRadius: 25,
+  },
+  body: {
+    marginTop: 30,
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  InputContainer: {
+    flex: 1,
+    height: 50,
+    borderRadius: 10,
+    flexDirection: 'row',
+    backgroundColor: '#2aece3',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  search: {
+    flex: 1,
+    fontSize: 18,
+    paddingHorizontal: 5,
+  },
+  sortBtn: {
+    width: 50,
+    height: 50,
+    marginLeft: 10,
+    backgroundColor: '#eaec31',
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  contentContainerStyle: {
+    paddingVertical: 30,
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  categoryBtn: {
+    height: 50,
+    width: 150,
+    marginRight: 7,
+    borderRadius: 30,
+    alignItems: 'center',
+    paddingHorizontal: 5,
+    flexDirection: 'row',
+  },
+  categoryBtnImgCon: {
+    height: 35,
+    width: 35,
+    backgroundColor: 'white',
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  card: {
+    height: 235,
+    width: cardWidth,
+    marginHorizontal: 10,
+    marginBottom: 20,
+    marginTop: 50,
+    borderRadius: 15,
+    elevation: 5,
+    backgroundColor: 'white',
+  },
+  addToCardBtn: {
+    height: 40,
+    width: 40,
+    borderRadius: 20,
+    marginLeft: '10%',
+    backgroundColor: '#eaec31',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: -10,
+  },
+  slider: {
+    flex: 0.5,
+    alignItems: 'center',
+  },
+  sliderContainer: {
+    height: '95%',
+    width: '90%',
+    marginTop: 10,
+    borderRadius: 8,
+  },
+  slide: {
+    flex: 0.8,
+    backgroundColor: 'transparent',
+    borderRadius: 8,
+    padding: 10,
+  },
+  sliderImage: {
+    height: 180,
+    width: '100%',
+    justifyContent: 'center',
+    alignSelf: 'center',
+    borderRadius: 8,
+    marginBottom: 30,
+  },
+})
