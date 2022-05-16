@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     width: 100,
     borderRadius: 75,
     borderWidth: 3,
-    elevation: 3,
+
     shadowColor: 'black',
     borderColor: 'white',
   },

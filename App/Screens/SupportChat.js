@@ -4,49 +4,88 @@ import Icon1 from 'react-native-vector-icons/MaterialIcons'
 import { GiftedChat, Bubble, Send } from 'react-native-gifted-chat'
 import Icon from 'react-native-vector-icons/Feather'
 import Icons from 'react-native-vector-icons/FontAwesome'
+import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
+import socket from '../../socket'
 
 const Checkout = ({ navigation }) => {
   const [messages, setMessages] = useState([])
 
-  useEffect(() => {
-    setMessages([
-      {
-        _id: 1,
-        text: 'Hello Derr',
-        createdAt: new Date(),
+  useEffect(async () => {
+    const id = await AsyncStorage.getItem('id')
+    socket.emit('updateChat', id.split(' ').join('+'))
+    socket.on(`chatchanged/${id.split(' ').join('+')}`, (newchat) => {
+      const chat2 = newchat.map((data, index) => ({
+        _id: index,
+        createdAt: new Date(data[1].date),
+        text: data[1].message,
         user: {
-          _id: 2,
-          name: 'React Native',
+          _id: data[1].who === 'user' ? 1 : 2,
+          name: 'Eats Online',
           avatar: require('../../assets/EOLogoYellowGlow.png'),
         },
+      }))
+      chat2.reverse()
+      setMessages(chat2)
+    })
+    socket.on(`newchat/${id.split(' ').join('+')}`, (newchat) => {
+      console.log(newchat)
+      //   setMessages((data) => [
+      //     ...data,
+      //     {
+      //       _id: messages.length,
+      //       createdAt: new Date(newchat[1].date),
+      //       text: newchat[1].message,
+      //       user: {
+      //         _id: newchat[1].who === 'user' ? 1 : 2,
+      //         name: 'Eats Online',
+      //         avatar: require('../../assets/EOLogoYellowGlow.png'),
+      //       },
+      //     },
+      //   ])
+    })
+    let response = await axios.get(
+      `https://eats-apionline.herokuapp.com/api/v1/chat?data=${JSON.stringify(
+        encryptJSON({
+          id: await AsyncStorage.getItem('id'),
+        })
+      )}`
+    )
+    response.data = decryptJSON(response.data.data)
+    const chat = response.data.data.map((data, index) => ({
+      _id: index,
+      createdAt: new Date(data[1].date),
+      text: data[1].message,
+      user: {
+        _id: data[1].who === 'user' ? 1 : 2,
+        name: 'Eats Online',
+        avatar: require('../../assets/EOLogoYellowGlow.png'),
       },
-      {
-        _id: 1,
-        text: 'Hello Derr',
-        createdAt: new Date(),
-        user: {
-          _id: 1,
-          name: 'React Native',
-          avatar: require('../../assets/EOLogoYellowGlow.png'),
-        },
-      },
-      {
-        _id: 1,
-        text: 'He Derr',
-        createdAt: new Date(),
-        user: {
-          _id: 1,
-          name: 'React Native',
-          avatar: require('../../assets/EOLogoYellowGlow.png'),
-        },
-      },
-    ])
+    }))
+    chat.reverse()
+    setMessages(chat)
+
+    // socket.on(`chatchanged/${await AsyncStorage.getItem('id')}`, (newchat) => {
+    //   setChat(newchat)
+    // })
   }, [])
 
-  const onSend = useCallback((messages = []) => {
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, messages)
+  const send = async (m) => {
+    await axios.post(
+      'https://eats-apionline.herokuapp.com/api/v1/chat',
+      encryptJSON({
+        id: await AsyncStorage.getItem('id'),
+        message: m,
+      })
     )
+  }
+
+  const onSend = useCallback(async (messages = []) => {
+    send(messages[0].text)
+    // setMessages((previousMessages) =>
+    //   GiftedChat.append(previousMessages, messages)
+    // )
   }, [])
 
   const renderSend = (props) => {
@@ -172,7 +211,6 @@ const styles = StyleSheet.create({
     height: 70,
     width: 70,
     borderRadius: 35,
-    elevation: 2,
   },
   card: {
     flex: 1,
