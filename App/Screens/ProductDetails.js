@@ -188,7 +188,7 @@ const Comments = (props) => {
 const ProductDetails = ({ navigation, route }) => {
   const item = route.params
   const [num, setNum] = useState(1)
-  const [checker, setCheckB] = useState(false)
+  const [checker, setCheckB] = useState(null)
   const [cartV, setCartV] = useState([])
   React.useEffect(async () => {
     const resp2 = await axios.get(
@@ -259,9 +259,9 @@ const ProductDetails = ({ navigation, route }) => {
                       borderTopLeftRadius: 5,
                       borderBottomLeftRadius: 5,
                     }}
-                    onPress={() => (num >= 100 ? setNum(100) : setNum(num + 1))}
+                    onPress={() => (num <= 1 ? setNum(1) : setNum(num - 1))}
                   >
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>+</Text>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>-</Text>
                   </TouchableOpacity>
                   <View
                     style={{
@@ -280,9 +280,9 @@ const ProductDetails = ({ navigation, route }) => {
                       borderTopRightRadius: 5,
                       borderBottomRightRadius: 5,
                     }}
-                    onPress={() => (num <= 1 ? setNum(1) : setNum(num - 1))}
+                    onPress={() => (num >= 100 ? setNum(100) : setNum(num + 1))}
                   >
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>-</Text>
+                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>+</Text>
                   </TouchableOpacity>
                 </View>
               ) : (

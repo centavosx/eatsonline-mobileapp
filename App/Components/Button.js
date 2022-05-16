@@ -3,11 +3,11 @@ import { TouchableOpacity, View, Text, StyleSheet } from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 import 'react-native-gesture-handler'
 
-const PrimaryButton = ({ title, onPress = () => {} }) => {
+const PrimaryButton = ({ title, onPress = () => {}, styles, fontstyles }) => {
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
-      <View style={style.btnContainer}>
-        <Text style={style.title}>{title}</Text>
+      <View style={{ ...style.btnContainer, ...styles }}>
+        <Text style={{ ...style.title, ...fontstyles }}>{title}</Text>
       </View>
     </TouchableOpacity>
   )
@@ -35,7 +35,7 @@ export { PrimaryButton, SecondaryButton }
 
 const style = StyleSheet.create({
   title: {
-    color: 'white',
+    color: 'black',
     fontWeight: 'bold',
     fontSize: 18,
   },

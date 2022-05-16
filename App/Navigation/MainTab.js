@@ -185,6 +185,32 @@ const MainTabs = (props) => {
           )}
         </Tab.Screen>
         <Tab.Screen
+          name="Cart"
+          options={{
+            tabBarIcon: ({ color }) => (
+              <View style={{ flexDirection: 'row' }}>
+                <Icon name="shopping-cart" color={color} size={30} />
+                {cartItem.length > 0 ? (
+                  <Text style={{ color: 'red' }}>{cartItem.length}</Text>
+                ) : null}
+              </View>
+            ),
+            headerShown: false,
+            tabBarLabelStyle: {
+              fontSize: 12,
+              fontWeight: 'bold',
+            },
+          }}
+        >
+          {(props) => (
+            <AddCartScreen
+              {...props}
+              cart={cartItem}
+              header={(v) => setHeader(v)}
+            />
+          )}
+        </Tab.Screen>
+        <Tab.Screen
           name="Notification"
           options={{
             tabBarIcon: ({ color }) => (

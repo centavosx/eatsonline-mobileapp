@@ -8,8 +8,8 @@ import LoginScreen from './App/Screens/Login'
 import RegisterScreen from './App/Screens/Registration'
 import OnBoardScreen from './App/Screens/OnBoard'
 import ProductScreen from './App/Screens/ProductDetails'
-import AddCartScreen from './App/Screens/AddCart'
-import Checkout from './App/Screens/Checkout'
+
+import Checkout from './App/Screens/CO'
 import SupportChat from './App/Screens/SupportChat'
 import Navigation from './App/Navigation/Navigation'
 import Loading from './App/Screens/Loading'
@@ -70,11 +70,7 @@ const App = () => {
             component={ProductScreen}
             options={{ headerShown: false }}
           />
-          <NavigationStack.Screen
-            name="AddCart"
-            component={AddCartScreen}
-            options={{ headerShown: false }}
-          />
+
           <NavigationStack.Screen
             name="Checkout"
             component={Checkout}

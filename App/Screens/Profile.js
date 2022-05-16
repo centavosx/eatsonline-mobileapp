@@ -172,7 +172,7 @@ const Profile = ({ navigation, setLogin, user }) => {
             }}
             onPress={() => setIndex(1)}
           >
-            <Text style={{ textAlign: 'center' }}>Orders</Text>
+            <Text style={{ textAlign: 'center' }}>Purchases</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -197,101 +197,125 @@ const Profile = ({ navigation, setLogin, user }) => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          <View
-            style={{
-              ...styles.card,
-              backgroundColor: 'white',
-              borderWidth: 1,
-              borderColor: 'lightgrey',
-              alignItems: 'baseline',
-              paddingTop: 15,
-              padding: 15,
-            }}
-          >
-            <View style={{ width: '100%' }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Profile</Text>
-              <View style={{ position: 'absolute', right: 1 }}>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: '#abdcdc',
-                    paddingHorizontal: 10,
-                    paddingVertical: 3,
-                    borderRadius: 10,
-                  }}
+          {index === 0 ? (
+            <View
+              style={{
+                ...styles.card,
+                backgroundColor: 'white',
+                borderWidth: 1,
+                borderColor: 'lightgrey',
+                alignItems: 'baseline',
+                paddingTop: 15,
+                padding: 15,
+              }}
+            >
+              <View style={{ width: '100%' }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                  Profile
+                </Text>
+                <View style={{ position: 'absolute', right: 1 }}>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#abdcdc',
+                      paddingHorizontal: 10,
+                      paddingVertical: 3,
+                      borderRadius: 10,
+                    }}
+                  >
+                    <Text>Edit</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View
+                style={{
+                  width: '100%',
+                  marginTop: 8,
+                  paddingHorizontal: 10,
+                }}
+              >
+                <Text
+                  style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
                 >
-                  <Text>Edit</Text>
-                </TouchableOpacity>
+                  Name:
+                </Text>
+                <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                  {user.name}
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: '200%',
+                  height: 2,
+                  backgroundColor: '#F0EEF6',
+                  marginLeft: -100,
+                  marginVertical: 5,
+                }}
+              ></View>
+              <View
+                style={{
+                  width: '100%',
+                  paddingTop: 5,
+                  paddingBottom: 5,
+                  paddingHorizontal: 10,
+                }}
+              >
+                <Text
+                  style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
+                >
+                  Email:
+                </Text>
+                <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                  {user.email}
+                </Text>
+              </View>
+              <View
+                style={{
+                  width: '200%',
+                  height: 2,
+                  backgroundColor: '#F0EEF6',
+                  marginLeft: -100,
+                  marginVertical: 5,
+                }}
+              ></View>
+              <View
+                style={{
+                  width: '100%',
+                  paddingTop: 5,
+                  paddingBottom: 5,
+                  paddingHorizontal: 10,
+                }}
+              >
+                <Text
+                  style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
+                >
+                  Phone Number:
+                </Text>
+                <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                  {user.phoneNumber}
+                </Text>
               </View>
             </View>
+          ) : index === 1 ? (
             <View
               style={{
-                width: '100%',
-                marginTop: 8,
-                paddingHorizontal: 10,
+                ...styles.card,
+                backgroundColor: 'white',
+                borderWidth: 1,
+                borderColor: 'lightgrey',
+                alignItems: 'baseline',
+                paddingTop: 15,
+                padding: 15,
               }}
             >
-              <Text
-                style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
-              >
-                Name:
-              </Text>
-              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
-                {user.name}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: '200%',
-                height: 2,
-                backgroundColor: '#F0EEF6',
-                marginLeft: -100,
-                marginVertical: 5,
-              }}
-            ></View>
-            <View
-              style={{
-                width: '100%',
-                paddingTop: 5,
-                paddingBottom: 5,
-                paddingHorizontal: 10,
-              }}
-            >
-              <Text
-                style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
-              >
-                Email:
-              </Text>
-              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
-                {user.email}
-              </Text>
-            </View>
-            <View
-              style={{
-                width: '200%',
-                height: 2,
-                backgroundColor: '#F0EEF6',
-                marginLeft: -100,
-                marginVertical: 5,
-              }}
-            ></View>
-            <View
-              style={{
-                width: '100%',
-                paddingTop: 5,
-                paddingBottom: 5,
-                paddingHorizontal: 10,
-              }}
-            >
-              <Text
-                style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
-              >
-                Phone Number:
-              </Text>
-              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
-                {user.phoneNumber}
-              </Text>
-            </View>
-          </View>
+              <View style={{ width: '100%' }}>
+                <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                  Order History
+                </Text>
+              </View>
+            </View> /*dito*/
+          ) : index === 2 ? (
+            <View></View>
+          ) : null}
           <View
             style={{
               ...styles.card,
