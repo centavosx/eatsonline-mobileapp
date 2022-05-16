@@ -12,10 +12,11 @@ import {
 } from 'react-native'
 import { ScreenStackHeaderBackButtonImage } from 'react-native-screens'
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import { PrimaryButton } from '../Components/Button'
+import { PrimaryButton, SecondaryButton } from '../Components/Button'
 
-const Profile = ({ navigation, setLogin }) => {
+const Profile = ({ navigation, setLogin, user }) => {
   const [index, setIndex] = useState(0)
+
   const logout = async () => {
     await AsyncStorage.removeItem('id')
     setLogin(false)
@@ -46,7 +47,9 @@ const Profile = ({ navigation, setLogin }) => {
         <View style={{ ...styles.card, backgroundColor: '#d6faf4' }}>
           <Image
             style={styles.userImg}
-            source={require('../../assets/j2.jpg')}
+            source={
+              !user.img ? require('../../assets/j2.jpg') : { uri: user.img }
+            }
           />
         </View>
         <View
@@ -149,7 +152,9 @@ const Profile = ({ navigation, setLogin }) => {
               >
                 Name:
               </Text>
-              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>Name</Text>
+              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                {user.name}
+              </Text>
             </View>
             <View
               style={{
@@ -171,9 +176,11 @@ const Profile = ({ navigation, setLogin }) => {
               <Text
                 style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
               >
-                Name:
+                Email:
               </Text>
-              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>Name</Text>
+              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                {user.email}
+              </Text>
             </View>
             <View
               style={{
@@ -184,7 +191,31 @@ const Profile = ({ navigation, setLogin }) => {
                 marginVertical: 5,
               }}
             ></View>
+            <View
+              style={{
+                width: '100%',
+                paddingTop: 5,
+                paddingBottom: 5,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
+              >
+                Phone Number:
+              </Text>
+              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                {user.phoneNumber}
+              </Text>
+            </View>
           </View>
+
+          <SecondaryButton
+            cart={false}
+            styles={{ backgroundColor: '#abdcdc', width: 150, marginLeft: 10 }}
+            title="Logout"
+            onPress={() => logout()}
+          />
         </ScrollView>
       </View>
     </View>

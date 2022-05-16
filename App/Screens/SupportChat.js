@@ -13,9 +13,12 @@ const Checkout = ({ navigation }) => {
   const [messages, setMessages] = useState([])
 
   useEffect(async () => {
-    const id = await AsyncStorage.getItem('id')
-    socket.emit('updateChat', id.split(' ').join('+'))
-    socket.on(`chatchanged/${id.split(' ').join('+')}`, (newchat) => {
+    const d = await AsyncStorage.getItem('id')
+    const id = d.split(' ').join('+')
+    socket.emit('user', id)
+    socket.emit('chat', id)
+    socket.emit('updateChat', id)
+    socket.on(`chatchanged/${id}`, (newchat) => {
       const chat2 = newchat.map((data, index) => ({
         _id: index,
         createdAt: new Date(data[1].date),
@@ -29,22 +32,7 @@ const Checkout = ({ navigation }) => {
       chat2.reverse()
       setMessages(chat2)
     })
-    socket.on(`newchat/${id.split(' ').join('+')}`, (newchat) => {
-      console.log(newchat)
-      //   setMessages((data) => [
-      //     ...data,
-      //     {
-      //       _id: messages.length,
-      //       createdAt: new Date(newchat[1].date),
-      //       text: newchat[1].message,
-      //       user: {
-      //         _id: newchat[1].who === 'user' ? 1 : 2,
-      //         name: 'Eats Online',
-      //         avatar: require('../../assets/EOLogoYellowGlow.png'),
-      //       },
-      //     },
-      //   ])
-    })
+
     let response = await axios.get(
       `https://eats-apionline.herokuapp.com/api/v1/chat?data=${JSON.stringify(
         encryptJSON({

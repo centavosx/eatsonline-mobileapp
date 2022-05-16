@@ -86,7 +86,11 @@ const Home = ({ navigation, cart, header }) => {
             underlayColor={'#2aece3'}
             activeOpacity={0.9}
             onPress={() =>
-              navigation.navigate('Product', { productid: id, ...food })
+              navigation.navigate('Product', {
+                productid: id,
+                cartinuser: cart,
+                ...food,
+              })
             }
           >
             <Image

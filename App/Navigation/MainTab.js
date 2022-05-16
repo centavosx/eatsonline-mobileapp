@@ -37,7 +37,15 @@ const MainTabs = (props) => {
       `https://eats-apionline.herokuapp.com/api/v1/profileData?data=${JSON.stringify(
         encryptJSON({
           id: await AsyncStorage.getItem('id'),
-          data: ['name', 'img'],
+          data: [
+            'name',
+            'address',
+            'email',
+            'phoneNumber',
+            'addresses',
+            'guest',
+            'img',
+          ],
         })
       )}`
     )
@@ -82,12 +90,10 @@ const MainTabs = (props) => {
       setCartItems(data)
     })
 
-    socket.on(
-      `userhead/${decrypt(await AsyncStorage.getItem('id'))}`,
-      (data) => {
-        setData(data)
-      }
-    )
+    socket.emit('userinfo', await AsyncStorage.getItem('id'))
+    socket.on(`user/${decrypt(await AsyncStorage.getItem('id'))}`, (data) => {
+      setData(data)
+    })
   }, [])
 
   React.useEffect(() => {
@@ -227,6 +233,7 @@ const MainTabs = (props) => {
               {...properties}
               setLogin={(v) => props.setLogin(v)}
               header={(v) => setHeader(v)}
+              user={data}
             />
           )}
         </Tab.Screen>

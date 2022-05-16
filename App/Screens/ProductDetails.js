@@ -189,6 +189,7 @@ const ProductDetails = ({ navigation, route }) => {
   const item = route.params
   const [num, setNum] = useState(1)
   const [checker, setCheckB] = useState(false)
+  const [cartV, setCartV] = useState([])
   React.useEffect(async () => {
     const resp2 = await axios.get(
       `https://eats-apionline.herokuapp.com/api/v1/checkIfBought?data=${JSON.stringify(
@@ -198,10 +199,16 @@ const ProductDetails = ({ navigation, route }) => {
         })
       )}`
     )
-
+    setCartV(item.cartinuser)
     const check = decryptJSON(resp2.data.data)
     setCheckB(check.check)
   }, [item])
+  React.useEffect(async () => {
+    socket.emit(`userinfocart`, await AsyncStorage.getItem('id'))
+    socket.on(`cart/${decrypt(await AsyncStorage.getItem('id'))}`, (data) => {
+      setCartV(data)
+    })
+  }, [])
   return (
     <SafeAreaView style={{ backgroundColor: 'yellow', flex: 1 }}>
       <View style={styles.header}>
@@ -237,46 +244,50 @@ const ProductDetails = ({ navigation, route }) => {
               >
                 {item.title}
               </Text>
-              <View
-                style={{
-                  fontWeight: 'bold',
-                  color: 'black',
-                  flexDirection: 'row',
-                }}
-              >
-                <TouchableOpacity
-                  style={{
-                    paddingHorizontal: 10,
-                    backgroundColor: '#d6faf4',
-                    borderTopLeftRadius: 5,
-                    borderBottomLeftRadius: 5,
-                  }}
-                  onPress={() => (num >= 100 ? setNum(100) : setNum(num + 1))}
-                >
-                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>+</Text>
-                </TouchableOpacity>
+              {!cartV.includes(decrypt(item.productid)) ? (
                 <View
                   style={{
-                    paddingHorizontal: 10,
-                    backgroundColor: '#abdcdc',
+                    fontWeight: 'bold',
+                    color: 'black',
+                    flexDirection: 'row',
                   }}
                 >
-                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                    {num}
-                  </Text>
+                  <TouchableOpacity
+                    style={{
+                      paddingHorizontal: 10,
+                      backgroundColor: '#d6faf4',
+                      borderTopLeftRadius: 5,
+                      borderBottomLeftRadius: 5,
+                    }}
+                    onPress={() => (num >= 100 ? setNum(100) : setNum(num + 1))}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>+</Text>
+                  </TouchableOpacity>
+                  <View
+                    style={{
+                      paddingHorizontal: 10,
+                      backgroundColor: '#abdcdc',
+                    }}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                      {num}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    style={{
+                      paddingHorizontal: 10,
+                      backgroundColor: '#d6faf4',
+                      borderTopRightRadius: 5,
+                      borderBottomRightRadius: 5,
+                    }}
+                    onPress={() => (num <= 1 ? setNum(1) : setNum(num - 1))}
+                  >
+                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>-</Text>
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  style={{
-                    paddingHorizontal: 10,
-                    backgroundColor: '#d6faf4',
-                    borderTopRightRadius: 5,
-                    borderBottomRightRadius: 5,
-                  }}
-                  onPress={() => (num <= 1 ? setNum(1) : setNum(num - 1))}
-                >
-                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>-</Text>
-                </TouchableOpacity>
-              </View>
+              ) : (
+                <Text>In Cart</Text>
+              )}
             </View>
             <Text style={styles.price}>Php{item.price.toFixed(2)}</Text>
             <View style={{ flexDirection: 'row' }}>
@@ -374,11 +385,18 @@ const ProductDetails = ({ navigation, route }) => {
           paddingHorizontal: 10,
         }}
       >
-        <SecondaryButton
-          cart={true}
-          title="Add To Cart"
-          onPress={() => addCart(item.productid, num)}
-        />
+        {!cartV.includes(decrypt(item.productid)) ? (
+          <SecondaryButton
+            cart={true}
+            title="Add To Cart"
+            onPress={() => addCart(item.productid, num)}
+          />
+        ) : (
+          <SecondaryButton
+            styles={{ backgroundColor: '#abdcdc' }}
+            title="In Cart"
+          />
+        )}
       </View>
     </SafeAreaView>
   )
