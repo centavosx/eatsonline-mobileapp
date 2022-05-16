@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import axios from 'axios'
 import React, { useState } from 'react'
 import {
   View,
@@ -12,15 +13,93 @@ import {
 } from 'react-native'
 import { ScreenStackHeaderBackButtonImage } from 'react-native-screens'
 import Icon from 'react-native-vector-icons/MaterialIcons'
+import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
+import { dataFire, storage } from '../../firebase/firebasecon'
 import { PrimaryButton, SecondaryButton } from '../Components/Button'
-
+import FormInput from '../Components/FormInput'
+import * as ImagePicker from 'expo-image-picker'
 const Profile = ({ navigation, setLogin, user }) => {
   const [index, setIndex] = useState(0)
-
+  const [valueAdd, setValueAdd] = useState('')
+  const [loading, setLoading] = useState(false)
+  React.useEffect(async () => {
+    if (Platform.OS !== 'web') {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
+      if (status !== 'granted') {
+        alert('Sorry, we need camera roll permissions to make this work!')
+      }
+    }
+  }, [])
   const logout = async () => {
     await AsyncStorage.removeItem('id')
     setLogin(false)
   }
+  const add = async () => {
+    if (valueAdd.length > 0) {
+      await axios.post(
+        'https://eats-apionline.herokuapp.com/api/v1/address',
+        encryptJSON({
+          id: await AsyncStorage.getItem('id'),
+          data: [
+            'name',
+            'address',
+            'email',
+            'phoneNumber',
+            'addresses',
+            'guest',
+          ],
+          address: valueAdd,
+        })
+      )
+      setValueAdd('')
+    }
+  }
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      quality: 1,
+    })
+    if (!result.cancelled) {
+      await updateProfilePic(result)
+    }
+  }
+  const updateProfilePic = async (image) => {
+    try {
+      setLoading(true)
+      const response = await fetch(image.uri)
+      const buffer = await response.blob()
+      let imagename =
+        'profilepicture.' +
+        image.uri.split('.')[image.uri.split('.').length - 1]
+      const idn = decrypt(await AsyncStorage.getItem('id'))
+      let ref = storage.ref(`accounts/${idn}/image`)
+      try {
+        let dir = await ref.listAll()
+        dir.items.forEach(async (fileRef) => {
+          var dirRef = storage.ref(fileRef.fullPath)
+          let url = await dirRef.getDownloadURL()
+          let imgRef = storage.refFromURL(url)
+          await imgRef.delete()
+        })
+      } catch {}
+      await storage
+        .ref(`accounts`)
+        .child(idn)
+        .child('image')
+        .child(imagename)
+        .put(buffer)
+      const url = await storage
+        .ref(`accounts/${idn}/image`)
+        .child(imagename)
+        .getDownloadURL()
+      await dataFire.ref('accounts').child(idn).update({ img: url })
+      setLoading(false)
+    } catch {
+      setLoading(false)
+    }
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: 'yellow' }}>
       <View
@@ -45,12 +124,16 @@ const Profile = ({ navigation, setLogin, user }) => {
           />
         </View>
         <View style={{ ...styles.card, backgroundColor: '#d6faf4' }}>
-          <Image
-            style={styles.userImg}
-            source={
-              !user.img ? require('../../assets/j2.jpg') : { uri: user.img }
-            }
-          />
+          {!loading ? (
+            <TouchableOpacity onPress={() => pickImage()}>
+              <Image
+                style={styles.userImg}
+                source={
+                  !user.img ? require('../../assets/j2.jpg') : { uri: user.img }
+                }
+              />
+            </TouchableOpacity>
+          ) : null}
         </View>
         <View
           style={{
@@ -209,7 +292,63 @@ const Profile = ({ navigation, setLogin, user }) => {
               </Text>
             </View>
           </View>
+          <View
+            style={{
+              ...styles.card,
+              backgroundColor: 'white',
+              borderWidth: 1,
+              borderColor: 'lightgrey',
+              alignItems: 'baseline',
+              paddingTop: 15,
+              padding: 15,
+            }}
+          >
+            <View style={{ width: '100%' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Address</Text>
+            </View>
+            <View style={{ width: '100%' }}>
+              <View
+                style={{
+                  paddingHorizontal: 10,
+                  paddingVertical: 6,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: 'lightgrey',
+                  width: '100%',
+                }}
+              >
+                <TextInput
+                  value={valueAdd}
+                  placeholder="Type Address"
+                  onChangeText={(v) => setValueAdd(v)}
+                />
+              </View>
 
+              <View style={{ position: 'absolute', right: 8, top: 8 }}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#abdcdc',
+                    paddingHorizontal: 10,
+                    paddingVertical: 3,
+                    borderRadius: 10,
+                  }}
+                  onPress={() => add()}
+                >
+                  <Text>Add</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={{ width: '100%', marginTop: 25 }}>
+              {user.addresses?.map((data, i) => (
+                <Text style={{ marginLeft: 5, color: 'black' }} key={i}>
+                  {i + 1}. {data[1].address}{' '}
+                  <Text style={{ color: 'red' }}>
+                    {data[1].primary ? '[DEFAULT]' : null}
+                  </Text>
+                </Text>
+              ))}
+            </View>
+          </View>
           <SecondaryButton
             cart={false}
             styles={{ backgroundColor: '#abdcdc', width: 150, marginLeft: 10 }}

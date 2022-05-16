@@ -107,12 +107,6 @@ const Transaction = ({ navigation, route }) => {
     }
   }
   const Cancel = async () => {
-    console.log({
-      id: await AsyncStorage.getItem('id'),
-      ref: data.what,
-      reason: '',
-      key: decrypt(data.keyid),
-    })
     await axios.patch(
       'https://eats-apionline.herokuapp.com/api/v1/cancelorder',
       encryptJSON({
