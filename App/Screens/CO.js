@@ -291,7 +291,67 @@ const Checkout = ({ navigation, route }) => {
                 />
               </CurveDiv>
             ) : null}
-
+            <CurveDiv>
+              <IconAndText
+                fontsize={16}
+                style={{
+                  flexDirection: 'row',
+                  paddingTop: 11,
+                  left: -8,
+                  marginBottom: 11,
+                }}
+                weight="bold"
+                text="Upload Receipt"
+                image={require('../../assets/receipt.png')}
+              />
+              <View>
+                <Text>hi</Text>
+              </View>
+            </CurveDiv>
+            <CurveDiv>
+              <IconAndText
+                fontsize={16}
+                style={{
+                  flexDirection: 'row',
+                  paddingTop: 11,
+                  left: -8,
+                  marginBottom: 11,
+                }}
+                weight="bold"
+                text="Payment Details"
+                image={require('../../assets/details.png')}
+              />
+              <Item
+                first="Gcash"
+                key={2}
+                style={{
+                  flexDirection: 'row',
+                  left: -8,
+                }}
+                color="black"
+                weight="bold"
+                size={14}
+                second={'026515445'}
+              />
+            </CurveDiv>
+            <CurveDiv>
+              <IconAndText
+                fontsize={16}
+                style={{
+                  flexDirection: 'row',
+                  paddingTop: 11,
+                  left: -8,
+                  marginBottom: 11,
+                }}
+                weight="bold"
+                text="Message"
+                image={require('../../assets/message.png')}
+              />
+              <View></View>
+            </CurveDiv>
+            <CurveDiv>
+              <RadioButton color="yellow" width={10} height={10} />
+            </CurveDiv>
             <View
               style={{
                 height: 100,
@@ -398,18 +458,27 @@ const CurveDiv = (props) => (
   </View>
 )
 
-const RadioButton = () => {
+const RadioButton = ({ width, height, color }) => {
   return (
     <TouchableOpacity
       style={{
-        width: 50,
-        height: 50,
+        width: width,
+        height: height,
         borderRadius: 40,
-        borderWidth: 1,
+        borderWidth: 2,
         borderColor: 'black',
-        backgroundColor: 'yello',
+        backgroundColor: 'white',
+        padding: 1,
       }}
-    ></TouchableOpacity>
+    >
+      <View
+        style={{
+          backgroundColor: color,
+          flex: 1,
+          borderRadius: 40,
+        }}
+      ></View>
+    </TouchableOpacity>
   )
 }
 export default Checkout

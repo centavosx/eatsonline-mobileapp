@@ -12,7 +12,7 @@ const PrimaryButton = ({ title, onPress = () => {}, styles, fontstyles }) => {
     </TouchableOpacity>
   )
 }
-const SecondaryButton = ({ styles, cart, title, onPress = () => {} }) => {
+const SecondaryButton = ({ styles, cart, title, font, onPress = () => {} }) => {
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
       <View
@@ -26,7 +26,7 @@ const SecondaryButton = ({ styles, cart, title, onPress = () => {} }) => {
         {cart ? (
           <AntDesign name="shoppingcart" size={25} style={{ marginRight: 5 }} />
         ) : null}
-        <Text style={{ ...style.title, color: 'black' }}>{title}</Text>
+        <Text style={{ ...style.title, color: 'black', ...font }}>{title}</Text>
       </View>
     </TouchableOpacity>
   )

@@ -99,7 +99,37 @@ const Profile = ({ navigation, setLogin, user }) => {
       setLoading(false)
     }
   }
-
+  const update = async (change, address, addressId, primary) => {
+    await axios.patch(
+      'https://eats-apionline.herokuapp.com/api/v1/address',
+      encryptJSON({
+        id: await AsyncStorage.getItem('id'),
+        data: ['name', 'address', 'email', 'phoneNumber', 'addresses', 'guest'],
+        address: address,
+        primary: primary,
+        change: change,
+        addressId: addressId,
+      })
+    )
+  }
+  const deleteAddress = async (addressId) => {
+    await axios.delete(
+      `https://eats-apionline.herokuapp.com/api/v1/address?data=${JSON.stringify(
+        encryptJSON({
+          id: await AsyncStorage.getItem('id'),
+          data: [
+            'name',
+            'address',
+            'email',
+            'phoneNumber',
+            'addresses',
+            'guest',
+          ],
+          addressId: addressId,
+        })
+      )}`
+    )
+  }
   return (
     <View style={{ flex: 1, backgroundColor: 'yellow' }}>
       <View
@@ -111,18 +141,6 @@ const Profile = ({ navigation, setLogin, user }) => {
           paddingHorizontal: 10,
         }}
       >
-        <View style={styles.header}>
-          <Icon
-            name="shopping-cart"
-            style={styles.cart}
-            onPress={() => navigation.navigate('AddCart')}
-          />
-          <Icon
-            name="forum"
-            style={styles.message}
-            onPress={() => navigation.navigate('SupportChat')}
-          />
-        </View>
         <View style={{ ...styles.card, backgroundColor: '#d6faf4' }}>
           {!loading ? (
             <TouchableOpacity onPress={() => pickImage()}>
@@ -172,7 +190,7 @@ const Profile = ({ navigation, setLogin, user }) => {
             }}
             onPress={() => setIndex(1)}
           >
-            <Text style={{ textAlign: 'center' }}>Purchases</Text>
+            <Text style={{ textAlign: 'center' }}>Orders</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -197,7 +215,7 @@ const Profile = ({ navigation, setLogin, user }) => {
           }}
           showsVerticalScrollIndicator={false}
         >
-          {index === 0 ? (
+          <Tab selected={index === 0} key={0}>
             <View
               style={{
                 ...styles.card,
@@ -295,7 +313,6 @@ const Profile = ({ navigation, setLogin, user }) => {
                 </Text>
               </View>
             </View>
-          ) : index === 1 ? (
             <View
               style={{
                 ...styles.card,
@@ -309,81 +326,361 @@ const Profile = ({ navigation, setLogin, user }) => {
             >
               <View style={{ width: '100%' }}>
                 <Text style={{ fontWeight: 'bold', fontSize: 16 }}>
+                  Address
+                </Text>
+              </View>
+              <View style={{ width: '100%' }}>
+                <View
+                  style={{
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 10,
+                    borderWidth: 1,
+                    borderColor: 'lightgrey',
+                    width: '100%',
+                  }}
+                >
+                  <TextInput
+                    value={valueAdd}
+                    placeholder="Type Address"
+                    onChangeText={(v) => setValueAdd(v)}
+                  />
+                </View>
+
+                <View style={{ position: 'absolute', right: 8, top: 8 }}>
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: '#abdcdc',
+                      paddingHorizontal: 10,
+                      paddingVertical: 3,
+                      borderRadius: 10,
+                    }}
+                    onPress={() => add()}
+                  >
+                    <Text>Add</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={{ width: '100%', marginTop: 20 }}>
+                {user.addresses?.map((data, i) => (
+                  <View
+                    style={{
+                      marginLeft: 5,
+                      marginTop: 3,
+                      color: 'black',
+                      width: '100%',
+                      flexDirection: 'row',
+                    }}
+                    key={i}
+                  >
+                    <Text style={{ width: '70%' }}>
+                      {i + 1}. {data[1].address}{' '}
+                      adwadwadwadwadwdwadwadawddddddddddddddddddddddddwadawd
+                    </Text>
+                    <View style={{ width: '30%' }}>
+                      {data[1].primary ? (
+                        <Text
+                          style={{
+                            position: 'relative',
+                            right: 1,
+                            color: 'green',
+                            textAlign: 'right',
+                          }}
+                        >
+                          {data[1].primary ? '[DEFAULT]' : null}
+                        </Text>
+                      ) : (
+                        <TouchableOpacity
+                          onPress={() =>
+                            update(false, data[1].address, data[0], true)
+                          }
+                        >
+                          <Text
+                            style={{
+                              color: 'blue',
+                              textAlign: 'right',
+                            }}
+                          >
+                            Primary
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                      {data[1].primary ? null : (
+                        <TouchableOpacity
+                          onPress={() => deleteAddress(data[0])}
+                        >
+                          <Text
+                            style={{
+                              color: 'red',
+                              textAlign: 'right',
+                              marginTop: 5,
+                            }}
+                          >
+                            Delete
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+            <SecondaryButton
+              cart={false}
+              styles={{
+                backgroundColor: '#abdcdc',
+                width: 150,
+                marginLeft: 10,
+              }}
+              title="Logout"
+              onPress={() => logout()}
+            />
+          </Tab>
+          <Tab selected={index === 1} key={1}>
+            <ScrollView>
+              <View style={{ flexDirection: 'row', marginBottom: 18 }}>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: 'black',
+                    width: '100%',
+                    fontWeight: 'bold',
+                  }}
+                >
                   Order History
                 </Text>
-              </View>
-            </View> /*dito*/
-          ) : index === 2 ? (
-            <View></View>
-          ) : null}
-          <View
-            style={{
-              ...styles.card,
-              backgroundColor: 'white',
-              borderWidth: 1,
-              borderColor: 'lightgrey',
-              alignItems: 'baseline',
-              paddingTop: 15,
-              padding: 15,
-            }}
-          >
-            <View style={{ width: '100%' }}>
-              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Address</Text>
-            </View>
-            <View style={{ width: '100%' }}>
-              <View
-                style={{
-                  paddingHorizontal: 10,
-                  paddingVertical: 6,
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: 'lightgrey',
-                  width: '100%',
-                }}
-              >
-                <TextInput
-                  value={valueAdd}
-                  placeholder="Type Address"
-                  onChangeText={(v) => setValueAdd(v)}
-                />
-              </View>
-
-              <View style={{ position: 'absolute', right: 8, top: 8 }}>
                 <TouchableOpacity
                   style={{
-                    backgroundColor: '#abdcdc',
+                    backgroundColor: 'darkgray',
                     paddingHorizontal: 10,
-                    paddingVertical: 3,
+                    paddingVertical: 6,
                     borderRadius: 10,
+                    fontSize: 15,
+                    color: 'black',
+                    // width: '50%',
+                    fontWeight: 'bold',
+                    textAlign: 'right',
+
+                    position: 'absolute',
+                    right: 1,
                   }}
-                  onPress={() => add()}
                 >
-                  <Text>Add</Text>
+                  <Text>Newest to Oldest</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-            <View style={{ width: '100%', marginTop: 25 }}>
-              {user.addresses?.map((data, i) => (
-                <Text style={{ marginLeft: 5, color: 'black' }} key={i}>
-                  {i + 1}. {data[1].address}{' '}
-                  <Text style={{ color: 'red' }}>
-                    {data[1].primary ? '[DEFAULT]' : null}
-                  </Text>
+              <CardTransaction />
+              <CardTransaction />
+            </ScrollView>
+          </Tab>
+          <Tab selected={index === 2} key={2}>
+            <ScrollView>
+              <View style={{ flexDirection: 'row', marginBottom: 18 }}>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: 'black',
+                    width: '100%',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Advance Order History
                 </Text>
-              ))}
-            </View>
-          </View>
-          <SecondaryButton
-            cart={false}
-            styles={{ backgroundColor: '#abdcdc', width: 150, marginLeft: 10 }}
-            title="Logout"
-            onPress={() => logout()}
-          />
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: 'darkgray',
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 10,
+                    fontSize: 15,
+                    color: 'black',
+                    // width: '50%',
+                    fontWeight: 'bold',
+                    textAlign: 'right',
+
+                    position: 'absolute',
+                    right: 1,
+                  }}
+                >
+                  <Text>Newest to Oldest</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </Tab>
         </ScrollView>
       </View>
     </View>
   )
 }
+const CardTransaction = (props) => (
+  <>
+    <View
+      style={{
+        ...styles.card,
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: 'lightgrey',
+        alignItems: 'baseline',
+        paddingTop: 15,
+        padding: 15,
+      }}
+    >
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '100%',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            color: 'black',
+
+            fontWeight: 'bold',
+          }}
+        >
+          Order No. ex01234
+        </Text>
+        <Text
+          style={{
+            position: 'absolute',
+            right: 1,
+            // left: 100,
+            fontSize: 15,
+            textAlign: 'right',
+            color: '#abdcdc',
+            fontWeight: 'bold',
+          }}
+        >
+          Pending
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '100%',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 13,
+            color: 'darkgray',
+
+            fontWeight: 'bold',
+          }}
+        >
+          More Details:
+        </Text>
+        <Text
+          style={{
+            color: 'blue',
+            fontSize: 13,
+            position: 'absolute',
+            right: 1,
+            textAlign: 'right',
+            color: 'darkgray',
+            textDecorationLine: 'underline',
+          }}
+          onPress={() => Linking.openURL('http://google.com')} //google po muna nilagay ko po
+        >
+          View ►
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '100%',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 13,
+            color: 'darkgray',
+            fontWeight: 'bold',
+          }}
+        >
+          Order Item
+        </Text>
+        <Text
+          style={{
+            fontSize: 13,
+            position: 'absolute',
+            right: 1,
+            textAlign: 'right',
+            color: 'darkgray',
+          }}
+        >
+          1
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '100%',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 13,
+            color: 'darkgray',
+
+            fontWeight: 'bold',
+          }}
+        >
+          Order Date
+        </Text>
+        <Text
+          style={{
+            fontSize: 13,
+
+            textAlign: 'right',
+            color: 'darkgray',
+            position: 'absolute',
+            right: 1,
+          }}
+        >
+          Sun, May 15, 2022 12:04PM
+        </Text>
+      </View>
+      <View
+        style={{
+          flexDirection: 'row',
+          width: '100%',
+          marginTop: 12,
+        }}
+      >
+        {/* pati po dito sa button po na ito */}
+
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#abdcdc',
+            paddingHorizontal: 15,
+            paddingVertical: 6,
+            borderRadius: 10,
+            fontSize: 12,
+          }}
+        >
+          <Text>Cancel</Text>
+        </TouchableOpacity>
+        <Text
+          style={{
+            marginTop: 3,
+            fontSize: 16,
+            fontWeight: 'bold',
+            color: 'black',
+            position: 'absolute',
+            right: 1,
+            textAlign: 'right',
+          }}
+        >
+          Order Total: ₱ 150.00
+        </Text>
+      </View>
+    </View>
+  </>
+)
+
+const Tab = (props) => <>{props.selected ? props.children : null}</>
+
 export default Profile
 const styles = StyleSheet.create({
   SafeArea: {
@@ -482,7 +779,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: 'rgba(234,236,49, .8)',
     width: '100%',
-    marginBottom: 20,
+    marginBottom: 12,
     borderRadius: 10,
     paddingBottom: 8,
     paddingTop: 8,

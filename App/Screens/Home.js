@@ -159,15 +159,14 @@ const Home = ({ navigation, cart, header }) => {
           <Text style={{ fontSize: 18, fontWeight: 'bold', width: '60%' }}>
             {Number(food.price).toFixed(2)}
           </Text>
-          <View style={styles.addToCardBtn}>
-            <TouchableHighlight
-              underlayColor={'#2aece3'}
-              activeOpacity={0.9}
-              onPress={async () => await addCart(id)}
-            >
-              <Icon name="add" size={25} color={'white'} />
-            </TouchableHighlight>
-          </View>
+          <TouchableHighlight
+            underlayColor={'#2aece3'}
+            activeOpacity={0.9}
+            onPress={async () => await addCart(id)}
+            style={styles.addToCardBtn}
+          >
+            <Icon name="add" size={25} color={'white'} />
+          </TouchableHighlight>
         </View>
       </View>
     )

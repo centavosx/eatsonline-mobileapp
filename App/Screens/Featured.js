@@ -179,15 +179,14 @@ const Home = ({ navigation, cart, header }) => {
           <Text style={{ fontSize: 18, fontWeight: 'bold', width: '60%' }}>
             {Number(food.price).toFixed(2)}
           </Text>
-          <View style={styles.addToCardBtn}>
-            <TouchableHighlight
-              underlayColor={'#2aece3'}
-              activeOpacity={0.9}
-              onPress={() => addCart(id)}
-            >
-              <Icon name="add" size={25} color={'white'} />
-            </TouchableHighlight>
-          </View>
+          <TouchableHighlight
+            style={styles.addToCardBtn}
+            underlayColor={'#2aece3'}
+            activeOpacity={0.9}
+            onPress={() => addCart(id)}
+          >
+            <Icon name="add" size={25} color={'white'} />
+          </TouchableHighlight>
         </View>
       </View>
     )
@@ -420,7 +419,7 @@ const styles = StyleSheet.create({
     height: 40,
     width: 40,
     borderRadius: 20,
-    marginLeft: '10%',
+    marginLeft: '15%',
     backgroundColor: '#eaec31',
     justifyContent: 'center',
     alignItems: 'center',

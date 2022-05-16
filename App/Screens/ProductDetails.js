@@ -186,7 +186,7 @@ const Comments = (props) => {
 }
 
 const ProductDetails = ({ navigation, route }) => {
-  const item = route.params
+  const [item, setItem] = useState({})
   const [num, setNum] = useState(1)
   const [checker, setCheckB] = useState(null)
   const [cartV, setCartV] = useState([])
@@ -195,14 +195,19 @@ const ProductDetails = ({ navigation, route }) => {
       `https://eats-apionline.herokuapp.com/api/v1/checkIfBought?data=${JSON.stringify(
         encryptJSON({
           id: await AsyncStorage.getItem('id'),
-          pid: item.productid,
+          pid: route.params.productid,
         })
       )}`
     )
-    setCartV(item.cartinuser)
+    setCartV(route.params.cartinuser)
     const check = decryptJSON(resp2.data.data)
+    setItem(route.params)
     setCheckB(check.check)
-  }, [item])
+    if (route.params.productid)
+      socket.on(decrypt(route.params.productid), (data) => {
+        setItem(data)
+      })
+  }, [route.params])
   React.useEffect(async () => {
     socket.emit(`userinfocart`, await AsyncStorage.getItem('id'))
     socket.on(`cart/${decrypt(await AsyncStorage.getItem('id'))}`, (data) => {
@@ -215,13 +220,14 @@ const ProductDetails = ({ navigation, route }) => {
         <Icon name="arrow-back-ios" size={28} onPress={navigation.goBack} />
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>
       </View>
-      <ScrollView>
+      <ScrollView style={{ backgroundColor: 'white' }}>
         <View
           style={{
             justifyContent: 'center',
             alignItems: 'center',
             height: 180,
-            marginBottom: 20,
+            paddingBottom: 20,
+            backgroundColor: 'yellow',
           }}
         >
           <Image
@@ -229,151 +235,158 @@ const ProductDetails = ({ navigation, route }) => {
             style={{ height: '100%', width: 180, borderRadius: 10 }}
           />
         </View>
-
-        <View style={styles.details}>
-          <View style={{ paddingHorizontal: 20, paddingTop: 40 }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
-            >
-              <Text
-                style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}
-              >
-                {item.title}
-              </Text>
-              {!cartV.includes(decrypt(item.productid)) ? (
-                <View
-                  style={{
-                    fontWeight: 'bold',
-                    color: 'black',
-                    flexDirection: 'row',
-                  }}
-                >
-                  <TouchableOpacity
-                    style={{
-                      paddingHorizontal: 10,
-                      backgroundColor: '#d6faf4',
-                      borderTopLeftRadius: 5,
-                      borderBottomLeftRadius: 5,
-                    }}
-                    onPress={() => (num <= 1 ? setNum(1) : setNum(num - 1))}
-                  >
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>-</Text>
-                  </TouchableOpacity>
-                  <View
-                    style={{
-                      paddingHorizontal: 10,
-                      backgroundColor: '#abdcdc',
-                    }}
-                  >
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                      {num}
-                    </Text>
-                  </View>
-                  <TouchableOpacity
-                    style={{
-                      paddingHorizontal: 10,
-                      backgroundColor: '#d6faf4',
-                      borderTopRightRadius: 5,
-                      borderBottomRightRadius: 5,
-                    }}
-                    onPress={() => (num >= 100 ? setNum(100) : setNum(num + 1))}
-                  >
-                    <Text style={{ fontSize: 18, fontWeight: 'bold' }}>+</Text>
-                  </TouchableOpacity>
-                </View>
-              ) : (
-                <Text>In Cart</Text>
-              )}
-            </View>
-            <Text style={styles.price}>Php{item.price.toFixed(2)}</Text>
-            <View style={{ flexDirection: 'row' }}>
+        <View style={{ backgroundColor: 'yellow' }}>
+          <View style={styles.details}>
+            <View style={{ paddingHorizontal: 20, paddingTop: 40 }}>
               <View
                 style={{
-                  ...styles.detailText1,
                   flexDirection: 'row',
-                  height: 40,
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
                 }}
               >
-                {createStars(item.comments, 15, 5, 0.1)}
-
                 <Text
+                  style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}
+                >
+                  {item.title}
+                </Text>
+                {!cartV.includes(decrypt(item.productid)) ? (
+                  <View
+                    style={{
+                      fontWeight: 'bold',
+                      color: 'black',
+                      flexDirection: 'row',
+                    }}
+                  >
+                    <TouchableOpacity
+                      style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: '#d6faf4',
+                        borderTopLeftRadius: 5,
+                        borderBottomLeftRadius: 5,
+                      }}
+                      onPress={() => (num <= 1 ? setNum(1) : setNum(num - 1))}
+                    >
+                      <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                        -
+                      </Text>
+                    </TouchableOpacity>
+                    <View
+                      style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: '#abdcdc',
+                      }}
+                    >
+                      <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                        {num}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      style={{
+                        paddingHorizontal: 10,
+                        backgroundColor: '#d6faf4',
+                        borderTopRightRadius: 5,
+                        borderBottomRightRadius: 5,
+                      }}
+                      onPress={() =>
+                        num >= 100 ? setNum(100) : setNum(num + 1)
+                      }
+                    >
+                      <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                        +
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <Text>In Cart</Text>
+                )}
+              </View>
+              <Text style={styles.price}>Php{item.price.toFixed(2)}</Text>
+              <View style={{ flexDirection: 'row' }}>
+                <View
                   style={{
-                    textAlignVertical: 'top',
-                    marginVertical: 4,
-                    marginLeft: 2,
+                    ...styles.detailText1,
+                    flexDirection: 'row',
+                    height: 40,
                   }}
                 >
-                  {item.comments}
+                  {createStars(item.comments, 15, 5, 0.1)}
+
+                  <Text
+                    style={{
+                      textAlignVertical: 'top',
+                      marginVertical: 4,
+                      marginLeft: 2,
+                    }}
+                  >
+                    {item.comments}
+                  </Text>
+                </View>
+                <Text style={styles.detailText2}>{item.totalsold} sold</Text>
+              </View>
+              <View
+                style={{
+                  width: '200%',
+                  left: -100,
+                  height: 2,
+                  backgroundColor: 'lightgrey',
+                }}
+              ></View>
+              <View style={{ paddingVertical: 5 }}>
+                <Text style={{ ...styles.detailText1, fontWeight: 'bold' }}>
+                  Description
+                </Text>
+                <Text style={styles.detailText}>{item.description}</Text>
+              </View>
+              <View
+                style={{
+                  width: '200%',
+                  left: -100,
+                  height: 2,
+                  backgroundColor: 'lightgrey',
+                }}
+              ></View>
+              <View style={{ paddingTop: 10, flexDirection: 'row' }}>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: 'black',
+                    width: '50%',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Category
+                </Text>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: 'black',
+                    width: '50%',
+                    fontWeight: 'bold',
+                  }}
+                >
+                  Supplier
                 </Text>
               </View>
-              <Text style={styles.detailText2}>{item.totalsold} sold</Text>
+              <View style={{ flexDirection: 'row', paddingBottom: 10 }}>
+                <Text style={{ ...styles.detailText2, width: '50%' }}>
+                  {item.type}
+                </Text>
+                <Text style={{ ...styles.detailText2, width: '50%' }}>
+                  {item.seller}
+                </Text>
+              </View>
             </View>
             <View
               style={{
                 width: '200%',
                 left: -100,
-                height: 2,
+                height: 20,
                 backgroundColor: 'lightgrey',
               }}
             ></View>
-            <View style={{ paddingVertical: 5 }}>
-              <Text style={{ ...styles.detailText1, fontWeight: 'bold' }}>
-                Description
-              </Text>
-              <Text style={styles.detailText}>{item.description}</Text>
-            </View>
-            <View
-              style={{
-                width: '200%',
-                left: -100,
-                height: 2,
-                backgroundColor: 'lightgrey',
-              }}
-            ></View>
-            <View style={{ paddingTop: 10, flexDirection: 'row' }}>
-              <Text
-                style={{
-                  fontSize: 15,
-                  color: 'black',
-                  width: '50%',
-                  fontWeight: 'bold',
-                }}
-              >
-                Category
-              </Text>
-              <Text
-                style={{
-                  fontSize: 15,
-                  color: 'black',
-                  width: '50%',
-                  fontWeight: 'bold',
-                }}
-              >
-                Supplier
-              </Text>
-            </View>
-            <View style={{ flexDirection: 'row', paddingBottom: 10 }}>
-              <Text style={{ ...styles.detailText2, width: '50%' }}>
-                {item.type}
-              </Text>
-              <Text style={{ ...styles.detailText2, width: '50%' }}>
-                {item.seller}
-              </Text>
-            </View>
+            <Comments id={item.productid} check={checker} />
           </View>
-          <View
-            style={{
-              width: '200%',
-              left: -100,
-              height: 20,
-              backgroundColor: 'lightgrey',
-            }}
-          ></View>
-          <Comments id={item.productid} check={checker} />
         </View>
       </ScrollView>
       <View

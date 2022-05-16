@@ -122,14 +122,24 @@ const MainTabs = (props) => {
             )}
           </View>
         </View>
-        <Image
-          style={styles.UserImage}
-          source={
-            data.img
-              ? { uri: data.img }
-              : require('../../assets/EOLogoYellowGlow.png')
-          }
-        />
+        <View style={{ flexDirection: 'row' }}>
+          <View style={{ flexDirection: 'row', marginRight: 7, marginTop: 2 }}>
+            <Icon
+              name="forum"
+              style={{ fontSize: 30 }}
+              onPress={() => props.navigation.navigate('SupportChat')}
+            />
+            <Text>1</Text>
+          </View>
+          <Image
+            style={styles.UserImage}
+            source={
+              data.img
+                ? { uri: data.img }
+                : require('../../assets/EOLogoYellowGlow.png')
+            }
+          />
+        </View>
       </View>
       <Tab.Navigator
         screenOptions={{
