@@ -24,14 +24,15 @@ import axios from 'axios'
 import socket from '../../socket'
 import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useFocusEffect } from '@react-navigation/native'
 const cardWidth = screenWidth / 2 - 20
-export const addCart = async (id) => {
+export const addCart = async (id, num) => {
   await axios.post(
     'https://eats-apionline.herokuapp.com/api/v1/addcart',
     encryptJSON({
       id: await AsyncStorage.getItem('id'),
       cartid: id,
-      amount: 1,
+      amount: num ? num : 1,
     })
   )
 }
@@ -57,12 +58,17 @@ export const createStars = (n, s, mT, mH) => {
   )
 }
 
-const Home = ({ navigation, cart }) => {
+const Home = ({ navigation, cart, header }) => {
   const [selectedCategoryIndex, setSelectedCategoryIndex] = React.useState(0)
   const [products, setProducts] = useState([])
   const [search, setSearch] = useState('')
   const [type, setType] = useState('')
   const [cat, setCat] = useState([])
+  useFocusEffect(
+    React.useCallback(() => {
+      header('Menu')
+    }, [])
+  )
   React.useEffect(async () => {
     const resp = await axios.get(
       'https://eats-apionline.herokuapp.com/api/v1/getData',
@@ -99,7 +105,9 @@ const Home = ({ navigation, cart }) => {
           <TouchableHighlight
             underlayColor={'#2aece3'}
             activeOpacity={0.9}
-            onPress={() => navigation.navigate('Product', food)}
+            onPress={() =>
+              navigation.navigate('Product', { productid: id, ...food })
+            }
           >
             <Image
               source={{ uri: food.link }}
@@ -261,49 +269,55 @@ const Home = ({ navigation, cart }) => {
   }
   //---------------------------USER INTERFACE--------------------------------
   return (
-    <View style={{ flex: 1, backgroundColor: '#d6faf4' }}>
-      <View style={styles.header}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Menu</Text>
-      </View>
-      <View style={styles.body}>
-        <View style={styles.InputContainer}>
-          <Icon name="search" size={30} />
-          <TextInput
-            style={styles.search}
-            placeholder="Search food name"
-            onChangeText={(v) => {
-              setSearch(v)
-              setType('title')
-            }}
-            value={search}
-          />
+    <View style={{ flex: 1, backgroundColor: 'yellow' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#d6faf4',
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
+        }}
+      >
+        <View style={styles.body}>
+          <View style={styles.InputContainer}>
+            <Icon name="search" size={30} />
+            <TextInput
+              style={styles.search}
+              placeholder="Search food name"
+              onChangeText={(v) => {
+                setSearch(v)
+                setType('title')
+              }}
+              value={search}
+            />
+          </View>
         </View>
+        <View>
+          <ListCategories cat={cat} />
+        </View>
+        {products.filter(
+          (item) =>
+            search.length <= 0 ||
+            item[1][type].toLowerCase().includes(search.toLowerCase())
+        ).length > 0 ? (
+          <FlatList
+            showsVerticalScrollIndicator={false}
+            style={{ flex: 0.4 }}
+            numColumns={2}
+            data={products.filter(
+              (item) =>
+                search.length <= 0 ||
+                item[1][type].toLowerCase().includes(search.toLowerCase())
+            )}
+            renderItem={({ item }, i) => (
+              <Card food={item[1]} key={i} id={item[0]} />
+            )}
+          />
+        ) : (
+          <Text style={{ marginHorizontal: 20 }}>No products</Text>
+        )}
+        {/*------------------SCROLL VIEW------------------*/}
       </View>
-      <View>
-        <ListCategories cat={cat} />
-      </View>
-      {products.filter(
-        (item) =>
-          search.length <= 0 ||
-          item[1][type].toLowerCase().includes(search.toLowerCase())
-      ).length > 0 ? (
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          style={{ flex: 0.4 }}
-          numColumns={2}
-          data={products.filter(
-            (item) =>
-              search.length <= 0 ||
-              item[1][type].toLowerCase().includes(search.toLowerCase())
-          )}
-          renderItem={({ item }, i) => (
-            <Card food={item[1]} key={i} id={item[0]} />
-          )}
-        />
-      ) : (
-        <Text style={{ marginHorizontal: 20 }}>No products</Text>
-      )}
-      {/*------------------SCROLL VIEW------------------*/}
     </View>
   )
 }

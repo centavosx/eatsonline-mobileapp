@@ -1,5 +1,12 @@
 import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native'
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  TextInput,
+} from 'react-native'
 import AntDesign from 'react-native-vector-icons/AntDesign'
 
 import image1 from '../../assets/EOLogoYellowGlow.png'
@@ -131,7 +138,6 @@ export const ForgotPass = ({ navigation, setLogin, route }) => {
   const [rmessage, setRmess] = useState('')
   useFocusEffect(
     React.useCallback(() => {
-      console.log(route.params.name)
       setEmail('')
       setRmess('')
     }, [])

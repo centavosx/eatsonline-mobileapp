@@ -1,3 +1,4 @@
+import { useFocusEffect } from '@react-navigation/native'
 import React from 'react'
 import {
   View,
@@ -11,54 +12,63 @@ import {
 } from 'react-native'
 import { decrypt } from '../../Encryption'
 
-export default function Notification({ navigation, notifications }) {
+export default function Notification({ navigation, notifications, header }) {
+  useFocusEffect(
+    React.useCallback(() => {
+      header('Notifications')
+    }, [])
+  )
   return (
-    <SafeAreaView style={styles.SafeArea}>
-      <View style={styles.header}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
-          Notifications
-        </Text>
-      </View>
-      <ScrollView
-        style={{ flex: 1, padding: 20, marginBottom: 20 }}
-        contentContainerStyle={{
-          justifyContent: 'center',
-          alignItems: 'center',
+    <View style={{ flex: 1, backgroundColor: 'yellow' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#d6faf4',
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
         }}
-        showsVerticalScrollIndicator={false}
       >
-        {notifications.map((data, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() =>
-              navigation.navigate('Transaction', {
-                data: {
-                  keyid: data[0][0],
-                  what: decrypt(data[0][1]),
-                  ...data[1],
-                },
-              })
-            }
-            style={{ width: '100%' }}
-          >
-            <View style={styles.card} key={index}>
-              <Text style={styles.userName}>{data[1].status}</Text>
-              <Text style={{ fontWeight: 'bold', ...styles.result }}>
-                Your order is now{' '}
-                {data[1].status === 'Delivering'
-                  ? 'being delivered'
-                  : data[1].status.toLowerCase()}
-              </Text>
-              <Text style={styles.result}>
-                Order Id:
-                <Text style={{ fontWeight: 'bold' }}>{data[1].id}</Text>
-              </Text>
-              <Text style={styles.result}>{data[1].pstatus}</Text>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+        <ScrollView
+          style={{ flex: 1, padding: 20, marginBottom: 20 }}
+          contentContainerStyle={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {notifications.map((data, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() =>
+                navigation.navigate('Transaction', {
+                  data: {
+                    keyid: data[0][0],
+                    what: decrypt(data[0][1]),
+                    ...data[1],
+                  },
+                })
+              }
+              style={{ width: '100%' }}
+            >
+              <View style={styles.card} key={index}>
+                <Text style={styles.userName}>{data[1].status}</Text>
+                <Text style={{ fontWeight: 'bold', ...styles.result }}>
+                  Your order is now{' '}
+                  {data[1].status === 'Delivering'
+                    ? 'being delivered'
+                    : data[1].status.toLowerCase()}
+                </Text>
+                <Text style={styles.result}>
+                  Order Id:
+                  <Text style={{ fontWeight: 'bold' }}>{data[1].id}</Text>
+                </Text>
+                <Text style={styles.result}>{data[1].pstatus}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+    </View>
   )
 }
 const styles = StyleSheet.create({

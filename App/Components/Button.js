@@ -12,7 +12,7 @@ const PrimaryButton = ({ title, onPress = () => {} }) => {
     </TouchableOpacity>
   )
 }
-const SecondaryButton = ({ title, onPress = () => {} }) => {
+const SecondaryButton = ({ styles, cart, title, onPress = () => {} }) => {
   return (
     <TouchableOpacity activeOpacity={0.8} onPress={onPress}>
       <View
@@ -20,9 +20,12 @@ const SecondaryButton = ({ title, onPress = () => {} }) => {
           ...style.btnContainer,
           backgroundColor: '#e1ad01',
           flexDirection: 'row',
+          ...styles,
         }}
       >
-        <AntDesign name="shoppingcart" size={25} style={{ marginRight: 5 }} />
+        {cart ? (
+          <AntDesign name="shoppingcart" size={25} style={{ marginRight: 5 }} />
+        ) : null}
         <Text style={{ ...style.title, color: 'black' }}>{title}</Text>
       </View>
     </TouchableOpacity>

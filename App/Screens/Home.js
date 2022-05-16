@@ -24,12 +24,17 @@ import { screenWidth } from '../Components/Dimension'
 import axios from 'axios'
 import socket from '../../socket'
 import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
+import { useFocusEffect } from '@react-navigation/native'
 
 const cardWidth = screenWidth / 2 - 20
 
-const Home = ({ navigation, cart }) => {
-  const [selectedCategoryIndex, setSelectedCategoryIndex] = React.useState(0)
+const Home = ({ navigation, cart, header }) => {
   const [products, setProducts] = useState([])
+  useFocusEffect(
+    React.useCallback(() => {
+      header(null)
+    }, [])
+  )
   React.useEffect(async () => {
     const resp = await axios.get(
       'https://eats-apionline.herokuapp.com/api/v1/getData',
@@ -80,7 +85,9 @@ const Home = ({ navigation, cart }) => {
           <TouchableHighlight
             underlayColor={'#2aece3'}
             activeOpacity={0.9}
-            onPress={() => navigation.navigate('Product', food)}
+            onPress={() =>
+              navigation.navigate('Product', { productid: id, ...food })
+            }
           >
             <Image
               source={{ uri: food.link }}
@@ -164,43 +171,52 @@ const Home = ({ navigation, cart }) => {
 
   //---------------------------USER INTERFACE--------------------------------
   return (
-    <View style={{ flex: 1, backgroundColor: '#d6faf4' }}>
-      <View style={styles.header}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Home</Text>
-      </View>
-      <View style={styles.slider}>
-        <View style={styles.sliderContainer}>
-          <Swiper
-            height={'100%'}
-            autoplay
-            activeDotColor="red"
-            dotColor="#2aece3"
-          >
-            {products.map((food, index) => (
-              <View style={styles.slide} key={index}>
-                <Image
-                  style={styles.sliderImage}
-                  resizeMode="cover"
-                  source={{ uri: food[1].link }}
-                />
-              </View>
-            ))}
-          </Swiper>
+    <View style={{ flex: 1, backgroundColor: 'yellow' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#d6faf4',
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
+        }}
+      >
+        <View style={styles.header}>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Home</Text>
         </View>
-      </View>
-      <View style={styles.body}>
-        <Text style={styles.UserText}>Featured Products</Text>
-      </View>
+        <View style={styles.slider}>
+          <View style={styles.sliderContainer}>
+            <Swiper
+              height={'100%'}
+              autoplay
+              activeDotColor="red"
+              dotColor="#2aece3"
+            >
+              {products.map((food, index) => (
+                <View style={styles.slide} key={index}>
+                  <Image
+                    style={styles.sliderImage}
+                    resizeMode="cover"
+                    source={{ uri: food[1].link }}
+                  />
+                </View>
+              ))}
+            </Swiper>
+          </View>
+        </View>
+        <View style={styles.body}>
+          <Text style={styles.UserText}>Featured Products</Text>
+        </View>
 
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        style={{ flex: 0.4 }}
-        numColumns={2}
-        data={products}
-        renderItem={({ item }, i) => (
-          <Card food={item[1]} key={i} id={item[0]} />
-        )}
-      />
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          style={{ flex: 0.4 }}
+          numColumns={2}
+          data={products}
+          renderItem={({ item }, i) => (
+            <Card food={item[1]} key={i} id={item[0]} />
+          )}
+        />
+      </View>
     </View>
   )
 }

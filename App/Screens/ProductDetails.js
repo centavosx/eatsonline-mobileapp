@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   View,
   Text,
@@ -6,32 +6,180 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
+  TouchableOpacity,
+  TextInput,
 } from 'react-native'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import Entypo from 'react-native-vector-icons/Entypo'
-import { createStars } from './Featured'
+import { addCart, createStars } from './Featured'
 import { SecondaryButton } from '../Components/Button'
+import axios from 'axios'
+import socket from '../../socket'
+import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const Comments = () => {
+const createClickableStars = (n, s, mT, mH, func) => {
+  let v = []
+  for (let x = 1; x <= 5; x++) {
+    if (x <= n) {
+      v.push(
+        <TouchableOpacity onPress={() => func(x)}>
+          <Entypo name="star" key={x} size={!s ? 10 : s} color="#e1ad01" />
+        </TouchableOpacity>
+      )
+    } else {
+      v.push(
+        <TouchableOpacity onPress={() => func(x)}>
+          <Entypo name="star" key={x} size={!s ? 10 : s} color="grey" />
+        </TouchableOpacity>
+      )
+    }
+  }
   return (
-    <SafeAreaView style={{ backgroundColor: 'white' }}>
+    <View
+      style={{
+        flexDirection: 'row',
+        marginTop: !mT ? -25 : mT,
+        marginHorizontal: !mH ? 20 : mH,
+      }}
+    >
+      {v.map((d) => d)}
+    </View>
+  )
+}
+const Comments = (props) => {
+  const [comments, setComments] = useState([])
+  const [message, setMessage] = useState('')
+  const [rate, setRate] = useState(0)
+  React.useEffect(() => {
+    if ((props.id?.length > 0 ?? false) && props.id) {
+      getComments()
+      socket.emit('comments', props.id.split(' ').join('+'))
+      socket.on(`productcomment/${props.id.split(' ').join('+')}`, (data) => {
+        data.reverse()
+        setComments(data)
+      })
+    }
+  }, [props.id])
+
+  const getComments = async () => {
+    const response = await axios.get(
+      `https://eats-apionline.herokuapp.com/api/v1/comment?data=${JSON.stringify(
+        encryptJSON({
+          id: props.id,
+        })
+      )}`
+    )
+
+    response.data = decryptJSON(response.data.data)
+    if (!response.data.error) {
+      response.data.data.reverse()
+      setComments(response.data.data)
+    }
+  }
+  const sendComment = async () => {
+    if (rate > 0 && message.length > 0) {
+      axios
+        .post(
+          'https://eats-apionline.herokuapp.com/api/v1/comment',
+          encryptJSON({
+            id: props.id.split(' ').join('+'),
+            message: message,
+            rate: rate,
+            uid: await AsyncStorage.getItem('id'),
+          })
+        )
+        .then((response) => {
+          response.data = decryptJSON(response.data.data)
+          setMessage('')
+          setRate(0)
+        })
+    } else {
+      setSubmitted({
+        success: false,
+        message: 'Please rate and type your message!',
+      })
+    }
+  }
+
+  return (
+    <SafeAreaView style={{ backgroundColor: 'white', paddingTop: 10 }}>
+      <Text style={{ ...styles.price, paddingHorizontal: 20 }}>Reviews</Text>
+      {props.check ? (
+        <>
+          <View style={{ paddingHorizontal: 20 }}>
+            {createClickableStars(rate, 15, 5, 0.1, setRate)}
+          </View>
+
+          <TextInput
+            style={{
+              height: 80,
+              margin: 12,
+              borderWidth: 1,
+              padding: 10,
+              textAlignVertical: 'top',
+              borderRadius: 10,
+            }}
+            onChangeText={setMessage}
+            value={message}
+            placeholder="Type message"
+            keyboardType="text"
+            multiline={true}
+          />
+          <SecondaryButton
+            cart={false}
+            title="Post"
+            styles={{ backgroundColor: '#d6faf4', width: 100, marginLeft: 10 }}
+            onPress={() => sendComment()}
+          />
+        </>
+      ) : (
+        <Text
+          style={{
+            ...styles.price,
+            paddingHorizontal: 20,
+            fontSize: 12,
+            color: 'red',
+            lineHeight: 18,
+          }}
+        >
+          You should atleast have one completed transaction containing this
+          product to submit a comment or review.
+        </Text>
+      )}
       <ScrollView style={{ padding: 10 }}>
-        <View style={{ flexDirection: 'row', width: '100%', padding: 10 }}>
-          <View style={{ width: 50 }}>
-            <Image
-              style={{
-                width: 50,
-                borderRadius: 45,
-                borderWidth: 1,
-                borderColor: 'black',
-                height: '100%',
-              }}
-            />
+        {comments.map((d, i) => (
+          <View
+            style={{ flexDirection: 'row', width: '100%', padding: 10 }}
+            key={i}
+          >
+            <View style={{ width: 50 }}>
+              <Image
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 45,
+                  borderWidth: 1,
+                  borderColor: 'black',
+                }}
+                source={
+                  d[1].img
+                    ? { uri: d[1].img }
+                    : require('../../assets/EOLogoYellowGlow.png')
+                }
+              />
+            </View>
+            <View>
+              <Text style={{ fontWeight: 'bold' }}>
+                {d[1].name.length > 12
+                  ? d[1].name.substr(0, 12) + '...'
+                  : d[1].name}
+              </Text>
+              {createStars(d[1].rating, 15, 5, 0.1)}
+              <Text>{d[1].message}</Text>
+            </View>
           </View>
-          <View>
-            <Text>daw</Text>
-          </View>
-        </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   )
@@ -39,8 +187,23 @@ const Comments = () => {
 
 const ProductDetails = ({ navigation, route }) => {
   const item = route.params
+  const [num, setNum] = useState(1)
+  const [checker, setCheckB] = useState(false)
+  React.useEffect(async () => {
+    const resp2 = await axios.get(
+      `https://eats-apionline.herokuapp.com/api/v1/checkIfBought?data=${JSON.stringify(
+        encryptJSON({
+          id: await AsyncStorage.getItem('id'),
+          pid: item.productid,
+        })
+      )}`
+    )
+
+    const check = decryptJSON(resp2.data.data)
+    setCheckB(check.check)
+  }, [item])
   return (
-    <SafeAreaView style={{ backgroundColor: '#e1ad01', flex: 1 }}>
+    <SafeAreaView style={{ backgroundColor: 'yellow', flex: 1 }}>
       <View style={styles.header}>
         <Icon name="arrow-back-ios" size={28} onPress={navigation.goBack} />
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Details</Text>
@@ -70,17 +233,72 @@ const ProductDetails = ({ navigation, route }) => {
               }}
             >
               <Text
-                style={{ fontSize: 25, fontWeight: 'bold', color: 'black' }}
+                style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}
               >
                 {item.title}
               </Text>
+              <View
+                style={{
+                  fontWeight: 'bold',
+                  color: 'black',
+                  flexDirection: 'row',
+                }}
+              >
+                <TouchableOpacity
+                  style={{
+                    paddingHorizontal: 10,
+                    backgroundColor: '#d6faf4',
+                    borderTopLeftRadius: 5,
+                    borderBottomLeftRadius: 5,
+                  }}
+                  onPress={() => (num >= 100 ? setNum(100) : setNum(num + 1))}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>+</Text>
+                </TouchableOpacity>
+                <View
+                  style={{
+                    paddingHorizontal: 10,
+                    backgroundColor: '#abdcdc',
+                  }}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                    {num}
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={{
+                    paddingHorizontal: 10,
+                    backgroundColor: '#d6faf4',
+                    borderTopRightRadius: 5,
+                    borderBottomRightRadius: 5,
+                  }}
+                  onPress={() => (num <= 1 ? setNum(1) : setNum(num - 1))}
+                >
+                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>-</Text>
+                </TouchableOpacity>
+              </View>
             </View>
             <Text style={styles.price}>Php{item.price.toFixed(2)}</Text>
             <View style={{ flexDirection: 'row' }}>
-              <Text style={styles.detailText1}>
+              <View
+                style={{
+                  ...styles.detailText1,
+                  flexDirection: 'row',
+                  height: 40,
+                }}
+              >
                 {createStars(item.comments, 15, 5, 0.1)}
-                <Text> {item.comments}</Text>
-              </Text>
+
+                <Text
+                  style={{
+                    textAlignVertical: 'top',
+                    marginVertical: 4,
+                    marginLeft: 2,
+                  }}
+                >
+                  {item.comments}
+                </Text>
+              </View>
               <Text style={styles.detailText2}>{item.totalsold} sold</Text>
             </View>
             <View
@@ -136,21 +354,30 @@ const ProductDetails = ({ navigation, route }) => {
               </Text>
             </View>
           </View>
-          <Comments />
+          <View
+            style={{
+              width: '200%',
+              left: -100,
+              height: 20,
+              backgroundColor: 'lightgrey',
+            }}
+          ></View>
+          <Comments id={item.productid} check={checker} />
         </View>
       </ScrollView>
       <View
         style={{
           position: 'relative',
-          backgroundColor: '#d6faf4',
+          backgroundColor: 'white',
           width: '100%',
           bottom: 1,
           paddingHorizontal: 10,
         }}
       >
         <SecondaryButton
+          cart={true}
           title="Add To Cart"
-          onPress={() => navigation.navigate('AddCart')}
+          onPress={() => addCart(item.productid, num)}
         />
       </View>
     </SafeAreaView>
@@ -168,7 +395,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   details: {
-    backgroundColor: '#d6faf4',
+    backgroundColor: 'white',
     borderTopRightRadius: 40,
     borderTopLeftRadius: 40,
   },
@@ -200,7 +427,7 @@ const styles = StyleSheet.create({
   price: {
     fontWeight: 'bold',
     lineHeight: 30,
-    fontSize: 18,
+    fontSize: 16,
     color: 'black',
   },
 })

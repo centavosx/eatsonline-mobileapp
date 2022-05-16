@@ -31,6 +31,7 @@ const MainTabs = (props) => {
   const [order, setOrder] = useState([])
   const [notifData, setNotifData] = useState([])
   const [cartItem, setCartItems] = useState([])
+  const [header, setHeader] = useState(null)
   React.useEffect(async () => {
     const response = await axios.get(
       `https://eats-apionline.herokuapp.com/api/v1/profileData?data=${JSON.stringify(
@@ -102,11 +103,17 @@ const MainTabs = (props) => {
       <View style={styles.header}>
         <View>
           <View style={{ flexDirection: 'row' }}>
-            <Text style={styles.Text}>Hello, </Text>
-            <Text style={styles.UserText}>
-              {data.name?.substr(0, 15)}{' '}
-              {data.name ? (data.name.length > 15 ? '...' : null) : null}
-            </Text>
+            {header === null ? (
+              <>
+                <Text style={styles.Text}>Hello, </Text>
+                <Text style={styles.UserText}>
+                  {data.name?.substr(0, 15)}{' '}
+                  {data.name ? (data.name.length > 15 ? '...' : null) : null}
+                </Text>
+              </>
+            ) : (
+              <Text style={styles.UserText}>{header}</Text>
+            )}
           </View>
         </View>
         <Image
@@ -141,7 +148,13 @@ const MainTabs = (props) => {
             },
           }}
         >
-          {(props) => <HomeScreen {...props} cart={cartItem} />}
+          {(props) => (
+            <HomeScreen
+              {...props}
+              cart={cartItem}
+              header={(v) => setHeader(v)}
+            />
+          )}
         </Tab.Screen>
 
         <Tab.Screen
@@ -157,7 +170,13 @@ const MainTabs = (props) => {
             },
           }}
         >
-          {(props) => <FeatureScreen {...props} cart={cartItem} />}
+          {(props) => (
+            <FeatureScreen
+              {...props}
+              cart={cartItem}
+              header={(v) => setHeader(v)}
+            />
+          )}
         </Tab.Screen>
         <Tab.Screen
           name="Notification"
@@ -180,7 +199,11 @@ const MainTabs = (props) => {
           }}
         >
           {(props) => (
-            <NotificationScreen {...props} notifications={notifData} />
+            <NotificationScreen
+              {...props}
+              notifications={notifData}
+              header={(v) => setHeader(v)}
+            />
           )}
         </Tab.Screen>
         <Tab.Screen
@@ -190,7 +213,7 @@ const MainTabs = (props) => {
               <Icon name="person" color={color} size={30} />
             ),
 
-            tabBarLabel: 'Notification',
+            tabBarLabel: 'Profile',
 
             headerShown: false,
             tabBarLabelStyle: {
@@ -203,6 +226,7 @@ const MainTabs = (props) => {
             <ProfileScreen
               {...properties}
               setLogin={(v) => props.setLogin(v)}
+              header={(v) => setHeader(v)}
             />
           )}
         </Tab.Screen>
@@ -238,10 +262,9 @@ const styles = StyleSheet.create({
   UserImage: {
     height: 40,
     width: 40,
+    marginTop: -5,
     borderRadius: 25,
     marginBottom: 10,
-    borderWidth: 1,
-    backgroundColor: 'white',
     borderColor: 'black',
   },
 })

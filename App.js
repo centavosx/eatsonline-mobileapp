@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar'
 import React, { useState } from 'react'
 import 'react-native-gesture-handler'
 import { NavigationContainer } from '@react-navigation/native'
-import { createStackNavigator } from '@react-navigation/stack'
+import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import MainTabs from './App/Navigation/MainTab'
 import LoginScreen from './App/Screens/Login'
 import RegisterScreen from './App/Screens/Registration'
@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import axios from 'axios'
 import { decrypt, decryptJSON, encrypt, encryptJSON } from './Encryption'
 
-const NavigationStack = createStackNavigator()
+const NavigationStack = createNativeStackNavigator()
 
 const App = () => {
   const [login, setLogin] = useState(null)

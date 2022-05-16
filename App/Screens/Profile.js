@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import React from 'react'
+import React, { useState } from 'react'
 import {
   View,
   Text,
@@ -15,68 +15,179 @@ import Icon from 'react-native-vector-icons/MaterialIcons'
 import { PrimaryButton } from '../Components/Button'
 
 const Profile = ({ navigation, setLogin }) => {
+  const [index, setIndex] = useState(0)
   const logout = async () => {
     await AsyncStorage.removeItem('id')
     setLogin(false)
   }
   return (
-    <SafeAreaView style={styles.SafeArea}>
-      <View style={styles.header}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Profile</Text>
-        <Icon
-          name="shopping-cart"
-          style={styles.cart}
-          onPress={() => navigation.navigate('AddCart')}
-        />
-        <Icon
-          name="forum"
-          style={styles.message}
-          onPress={() => navigation.navigate('SupportChat')}
-        />
-      </View>
-      <View style={styles.body}>
-        <Image style={styles.user} source={require('../../assets/j2.jpg')} />
-        <View style={styles.InputContainer}>
-          <Text
-            style={styles.Login}
-            onPress={() => navigation.navigate('Login')}
-          >
-            Edit
-          </Text>
-        </View>
-        <View style={styles.sortBtn}>
-          <Text style={styles.Signup} onPress={async () => await logout()}>
-            Logout
-          </Text>
-        </View>
-      </View>
-
-      <ScrollView
-        style={{ flex: 1, padding: 20 }}
-        contentContainerStyle={{
-          justifyContent: 'center',
-          alignItems: 'center',
+    <View style={{ flex: 1, backgroundColor: 'yellow' }}>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: '#d6faf4',
+          borderTopLeftRadius: 25,
+          borderTopRightRadius: 25,
+          paddingHorizontal: 10,
         }}
-        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.card}>
+        <View style={styles.header}>
+          <Icon
+            name="shopping-cart"
+            style={styles.cart}
+            onPress={() => navigation.navigate('AddCart')}
+          />
+          <Icon
+            name="forum"
+            style={styles.message}
+            onPress={() => navigation.navigate('SupportChat')}
+          />
+        </View>
+        <View style={{ ...styles.card, backgroundColor: '#d6faf4' }}>
           <Image
             style={styles.userImg}
             source={require('../../assets/j2.jpg')}
           />
-          <Text style={styles.userName}> Jichuu</Text>
-          <Text style={styles.aboutUser}>ImNotScary@gmail.com</Text>
         </View>
-
-        <View style={styles.card}>
-          <Text style={styles.userName}>Order Here</Text>
-          <Text style={styles.result}> Kalamares</Text>
-          <Text style={styles.result}> Kangkong</Text>
-          <Text style={styles.result}> Sibuyas</Text>
-          <Text style={styles.result}> Petchay</Text>
+        <View
+          style={{
+            ...styles.card,
+            height: 42,
+            flexDirection: 'row',
+            width: '100%',
+            alignItems: 'baseline',
+            paddingTop: 0,
+            backgroundColor: 'white',
+            borderWidth: 1,
+            borderColor: 'lightgrey',
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              width: '32.35%',
+              backgroundColor: index === 0 ? '#abdcdc' : 'white',
+              borderTopLeftRadius: 10,
+              borderBottomLeftRadius: 10,
+              height: 40,
+              alignItems: 'center',
+              paddingTop: 10,
+            }}
+            onPress={() => setIndex(0)}
+          >
+            <Text style={{ textAlign: 'center' }}>Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              width: '31.35%',
+              backgroundColor: index === 1 ? '#abdcdc' : 'white',
+              height: 40,
+              alignItems: 'center',
+              paddingTop: 10,
+            }}
+            onPress={() => setIndex(1)}
+          >
+            <Text style={{ textAlign: 'center' }}>Orders</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              width: '36.35%',
+              backgroundColor: index === 2 ? '#abdcdc' : 'white',
+              borderTopRightRadius: 10,
+              borderBottomRightRadius: 10,
+              height: 40,
+              alignItems: 'center',
+              paddingTop: 10,
+            }}
+            onPress={() => setIndex(2)}
+          >
+            <Text style={{ textAlign: 'center' }}>Advance Orders</Text>
+          </TouchableOpacity>
         </View>
-      </ScrollView>
-    </SafeAreaView>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={{
+              ...styles.card,
+              backgroundColor: 'white',
+              borderWidth: 1,
+              borderColor: 'lightgrey',
+              alignItems: 'baseline',
+              paddingTop: 15,
+              padding: 15,
+            }}
+          >
+            <View style={{ width: '100%' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>Profile</Text>
+              <View style={{ position: 'absolute', right: 1 }}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: '#abdcdc',
+                    paddingHorizontal: 10,
+                    paddingVertical: 3,
+                    borderRadius: 10,
+                  }}
+                >
+                  <Text>Edit</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View
+              style={{
+                width: '100%',
+                marginTop: 8,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
+              >
+                Name:
+              </Text>
+              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>Name</Text>
+            </View>
+            <View
+              style={{
+                width: '200%',
+                height: 2,
+                backgroundColor: '#F0EEF6',
+                marginLeft: -100,
+                marginVertical: 5,
+              }}
+            ></View>
+            <View
+              style={{
+                width: '100%',
+                paddingTop: 5,
+                paddingBottom: 5,
+                paddingHorizontal: 10,
+              }}
+            >
+              <Text
+                style={{ fontWeight: 'bold', fontSize: 11, marginRight: 6 }}
+              >
+                Name:
+              </Text>
+              <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>Name</Text>
+            </View>
+            <View
+              style={{
+                width: '200%',
+                height: 2,
+                backgroundColor: '#F0EEF6',
+                marginLeft: -100,
+                marginVertical: 5,
+              }}
+            ></View>
+          </View>
+        </ScrollView>
+      </View>
+    </View>
   )
 }
 export default Profile
@@ -94,15 +205,15 @@ const styles = StyleSheet.create({
     color: '#2e64e5',
   },
   header: {
-    paddingVertical: 20,
+    paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     marginHorizontal: 15,
-    marginTop: 20,
   },
   cart: {
     fontSize: 28,
-    marginLeft: 190,
+    position: 'absolute',
+    right: 1,
   },
   message: {
     fontSize: 28,
@@ -146,16 +257,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   body: {
-    marginTop: 20,
+    marginTop: 10,
     flexDirection: 'row',
     paddingHorizontal: 20,
   },
   userImg: {
-    height: 150,
-    width: 150,
+    height: 100,
+    width: 100,
     borderRadius: 75,
-    borderWidth: 2,
-    borderColor: '#000000',
+    borderWidth: 3,
+    elevation: 3,
+    shadowColor: 'black',
+    borderColor: 'white',
   },
   userName: {
     fontSize: 25,
