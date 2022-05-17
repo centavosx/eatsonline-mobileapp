@@ -32,6 +32,7 @@ const MainTabs = (props) => {
   const [notifData, setNotifData] = useState([])
   const [cartItem, setCartItems] = useState([])
   const [header, setHeader] = useState(null)
+
   React.useEffect(async () => {
     const response = await axios.get(
       `https://eats-apionline.herokuapp.com/api/v1/profileData?data=${JSON.stringify(
@@ -123,14 +124,7 @@ const MainTabs = (props) => {
           </View>
         </View>
         <View style={{ flexDirection: 'row' }}>
-          <View style={{ flexDirection: 'row', marginRight: 7, marginTop: 2 }}>
-            <Icon
-              name="forum"
-              style={{ fontSize: 30 }}
-              onPress={() => props.navigation.navigate('SupportChat')}
-            />
-            <Text>1</Text>
-          </View>
+          <ChatOnly navigation={props.navigation} />
           <Image
             style={styles.UserImage}
             source={
@@ -201,7 +195,11 @@ const MainTabs = (props) => {
               <View style={{ flexDirection: 'row' }}>
                 <Icon name="shopping-cart" color={color} size={30} />
                 {cartItem.length > 0 ? (
-                  <Text style={{ color: 'red' }}>{cartItem.length}</Text>
+                  <Text
+                    style={{ color: 'red', position: 'absolute', right: -7 }}
+                  >
+                    {cartItem.length}
+                  </Text>
                 ) : null}
               </View>
             ),
@@ -217,6 +215,7 @@ const MainTabs = (props) => {
               {...props}
               cart={cartItem}
               header={(v) => setHeader(v)}
+              data={{ name: data.name, phone: data.phoneNumber }}
             />
           )}
         </Tab.Screen>
@@ -311,5 +310,27 @@ const styles = StyleSheet.create({
     borderColor: 'black',
   },
 })
+
+const ChatOnly = (props) => {
+  const [unread, setUnread] = useState(0)
+  React.useEffect(async () => {
+    console.log('hello')
+    socket.emit('user', await AsyncStorage.getItem('id'))
+    socket.emit('chat', await AsyncStorage.getItem('id'))
+    socket.on(`unread/${await AsyncStorage.getItem('id')}`, (unread) => {
+      setUnread(unread)
+    })
+  }, [])
+  return (
+    <View style={{ flexDirection: 'row', marginRight: 7, marginTop: 2 }}>
+      <Icon
+        name="forum"
+        style={{ fontSize: 30 }}
+        onPress={() => props.navigation.navigate('SupportChat')}
+      />
+      {unread > 0 ? <Text style={{ color: 'red' }}>{unread}</Text> : null}
+    </View>
+  )
+}
 
 export default MainTabs

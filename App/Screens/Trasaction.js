@@ -231,11 +231,22 @@ const Transaction = ({ navigation, route }) => {
                 }}
                 widthleft="30%"
                 widthright="70%"
-                rightweight="normal"
+                rightweight="bold"
                 size={12}
                 color="black"
+                color2={
+                  data.status === 'Pending'
+                    ? '#406b00'
+                    : data.status === 'Processing'
+                    ? '#abdcdc'
+                    : data.status === 'Delivering'
+                    ? 'blue'
+                    : data.status === 'Completed'
+                    ? 'green'
+                    : 'red'
+                }
                 weight="bold"
-                key={'c'}
+                key={'d'}
                 second={data.status}
               />
               <Item
@@ -250,8 +261,24 @@ const Transaction = ({ navigation, route }) => {
                 size={12}
                 color="black"
                 weight="bold"
-                key={'c'}
+                weight2="bold"
+                key={'e'}
                 second={data.pstatus}
+              />
+              <Item
+                first="Payment Status"
+                style={{
+                  flexDirection: 'row',
+                  left: -8,
+                }}
+                widthleft="30%"
+                widthright="70%"
+                rightweight="normal"
+                size={12}
+                color="black"
+                weight="bold"
+                key={'c'}
+                second={data.payment}
               />
               <Item
                 first="Order Date"
@@ -265,7 +292,7 @@ const Transaction = ({ navigation, route }) => {
                 size={12}
                 color="black"
                 weight="bold"
-                key={'c'}
+                key={'f'}
                 second={
                   new Date(data.dateBought).toDateString() +
                   ' ' +
@@ -285,7 +312,7 @@ const Transaction = ({ navigation, route }) => {
                   size={12}
                   color="black"
                   weight="bold"
-                  key={'c'}
+                  key={'g'}
                   second={
                     new Date(data.dateDelivered).toDateString() +
                     ' ' +
@@ -306,7 +333,7 @@ const Transaction = ({ navigation, route }) => {
                   size={12}
                   color="black"
                   weight="bold"
-                  key={'c'}
+                  key={'h'}
                   second={
                     new Date(data.datePaid).toDateString() +
                     ' ' +
@@ -430,107 +457,75 @@ const Transaction = ({ navigation, route }) => {
                 />
               </CurveDiv>
             ) : null}
-            <CurveDiv>
-              <IconAndText
-                text="Payment Details"
-                style={{
-                  flexDirection: 'row',
-                  paddingTop: 11,
-                  left: -8,
-                }}
-                image={require('../../assets/details.png')}
-                weight="bold"
-                fontsize={16}
-              />
+            {data.payment === 'Online Payment' ? (
+              <CurveDiv>
+                <IconAndText
+                  text="Payment Details"
+                  style={{
+                    flexDirection: 'row',
+                    paddingTop: 11,
+                    left: -8,
+                  }}
+                  image={require('../../assets/details.png')}
+                  weight="bold"
+                  fontsize={16}
+                />
 
-              <View
-                style={{
-                  flexDirection: 'row',
-                  left: -12,
-                }}
-              >
-                <View style={{ width: '15%' }}></View>
-                <View style={{ width: '85%', flexDirection: 'row' }}>
-                  <Picker
-                    selectedValue={bankorgcash}
-                    style={{ width: 120 }}
-                    onValueChange={(itemValue, itemIndex) =>
-                      setBankOrGcash(itemValue)
-                    }
-                  >
-                    <Picker.Item
-                      label="GCASH"
-                      style={{
-                        fontSize: 12,
-                        backgroundColor: 'red',
-                      }}
-                      value="gcash"
-                    />
-                    <Picker.Item
-                      style={{ fontSize: 12 }}
-                      label="BANK"
-                      value="bank"
-                    />
-                  </Picker>
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    left: -12,
+                  }}
+                >
+                  <View style={{ width: '15%' }}></View>
+                  <View style={{ width: '85%', flexDirection: 'row' }}>
+                    <Picker
+                      selectedValue={bankorgcash}
+                      style={{ width: 120 }}
+                      onValueChange={(itemValue, itemIndex) =>
+                        setBankOrGcash(itemValue)
+                      }
+                    >
+                      <Picker.Item
+                        label="GCASH"
+                        style={{
+                          fontSize: 12,
+                          backgroundColor: 'red',
+                        }}
+                        value="gcash"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="BANK"
+                        value="bank"
+                      />
+                    </Picker>
+                  </View>
                 </View>
-              </View>
-              {bankorgcash === 'bank' ? (
+                {bankorgcash === 'bank' ? (
+                  <IconAndText
+                    fontsize={12}
+                    style={{ flexDirection: 'row' }}
+                    weight="bold"
+                    text={bank.bank}
+                  />
+                ) : null}
                 <IconAndText
                   fontsize={12}
-                  style={{ flexDirection: 'row' }}
+                  style={{ flexDirection: 'row', paddingTop: 3 }}
                   weight="bold"
-                  text={bank.bank}
+                  text={bankorgcash === 'bank' ? bank.holder : gcash.holder}
                 />
-              ) : null}
-              <IconAndText
-                fontsize={12}
-                style={{ flexDirection: 'row', paddingTop: 3 }}
-                weight="bold"
-                text={bankorgcash === 'bank' ? bank.holder : gcash.holder}
-              />
-              <IconAndText
-                fontsize={12}
-                style={{
-                  flexDirection: 'row',
-                  paddingTop: 3,
-                  marginBottom: 10,
-                }}
-                weight="bold"
-                text={bankorgcash === 'bank' ? bank.number : gcash.number}
-              />
-              <View
-                style={{
-                  height: 180,
-                  width: '100%',
-                  paddingHorizontal: '25%',
-                  marginBottom: 10,
-                }}
-              >
-                <Image
-                  source={{
-                    uri: bankorgcash === 'bank' ? bank.url : gcash.url,
+                <IconAndText
+                  fontsize={12}
+                  style={{
+                    flexDirection: 'row',
+                    paddingTop: 3,
+                    marginBottom: 10,
                   }}
-                  style={{ height: '100%', width: '100%' }}
+                  weight="bold"
+                  text={bankorgcash === 'bank' ? bank.number : gcash.number}
                 />
-              </View>
-
-              {/* <Item /> */}
-            </CurveDiv>
-            <CurveDiv>
-              <IconAndText
-                text="Upload Receipt"
-                style={{
-                  flexDirection: 'row',
-                  paddingTop: 11,
-                  left: -8,
-                  marginBottom: 11,
-                }}
-                weight="bold"
-                fontsize={16}
-                image={require('../../assets/receipt.png')}
-              />
-
-              {data.receipt ? (
                 <View
                   style={{
                     height: 180,
@@ -541,79 +536,115 @@ const Transaction = ({ navigation, route }) => {
                 >
                   <Image
                     source={{
-                      uri: data.receipt,
+                      uri: bankorgcash === 'bank' ? bank.url : gcash.url,
                     }}
                     style={{ height: '100%', width: '100%' }}
                   />
                 </View>
-              ) : null}
-              {!image ? (
-                <TouchableOpacity
+
+                {/* <Item /> */}
+              </CurveDiv>
+            ) : null}
+            {data.payment === 'Online Payment' ? (
+              <CurveDiv>
+                <IconAndText
+                  text="Upload Receipt"
                   style={{
-                    backgroundColor: 'yellow',
-                    width: '70%',
-                    marginHorizontal: '15%',
-                    height: 40,
-                    padding: 10,
-                    marginBottom: 10,
+                    flexDirection: 'row',
+                    paddingTop: 11,
+                    left: -8,
+                    marginBottom: 11,
                   }}
-                  onPress={() => pickImage()}
-                >
-                  <Text
+                  weight="bold"
+                  fontsize={16}
+                  image={require('../../assets/receipt.png')}
+                />
+
+                {data.receipt ? (
+                  <View
                     style={{
-                      color: 'black',
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      textAlign: 'center',
+                      height: 180,
+                      width: '100%',
+                      paddingHorizontal: '25%',
+                      marginBottom: 10,
                     }}
                   >
-                    Upload Receipt
-                  </Text>
-                </TouchableOpacity>
-              ) : null}
-            </CurveDiv>
-            <View
-              style={{
-                height: 100,
-                backgroundColor: 'white',
-                borderTopEndRadius: 40,
-                borderTopStartRadius: 40,
-                padding: 27,
-                paddingBottom: 20,
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor:
-                    data.status === 'Pending' || data.status === 'Processing'
-                      ? 'red'
-                      : 'grey',
-                  borderRadius: 20,
-                  padding: 8,
-                }}
-                onPress={async () =>
-                  data.status === 'Pending' || data.status === 'Processing'
-                    ? await Cancel()
-                    : null
-                }
-              >
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    fontSize: 28,
-                    fontWeight: 'bold',
-                    color: 'white',
-                  }}
-                >
-                  Cancel Order
-                </Text>
-              </TouchableOpacity>
-            </View>
+                    <Image
+                      source={{
+                        uri: data.receipt,
+                      }}
+                      style={{ height: '100%', width: '100%' }}
+                    />
+                  </View>
+                ) : null}
+                {!image ? (
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: 'yellow',
+                      width: '70%',
+                      marginHorizontal: '15%',
+                      height: 40,
+                      padding: 10,
+                      marginBottom: 10,
+                    }}
+                    onPress={() => pickImage()}
+                  >
+                    <Text
+                      style={{
+                        color: 'black',
+                        fontWeight: 'bold',
+                        fontSize: 16,
+                        textAlign: 'center',
+                      }}
+                    >
+                      Upload Receipt
+                    </Text>
+                  </TouchableOpacity>
+                ) : null}
+              </CurveDiv>
+            ) : null}
           </View>
         </View>
       </ScrollView>
+      <View
+        style={{
+          height: 100,
+          backgroundColor: 'white',
+          borderTopEndRadius: 40,
+          borderTopStartRadius: 40,
+          padding: 27,
+          paddingBottom: 20,
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor:
+              data.status === 'Pending' || data.status === 'Processing'
+                ? 'red'
+                : 'grey',
+            borderRadius: 20,
+            padding: 8,
+          }}
+          onPress={async () =>
+            data.status === 'Pending' || data.status === 'Processing'
+              ? await Cancel()
+              : null
+          }
+        >
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 28,
+              fontWeight: 'bold',
+              color: 'white',
+            }}
+          >
+            Cancel Order
+          </Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   )
 }
@@ -641,7 +672,7 @@ const Item = (props) => (
           width: props.widthright ?? '40%',
           textAlign: 'right',
           paddingRight: 25,
-          color: props.color,
+          color: props.color2 ?? props.color,
         }}
       >
         {props.second}

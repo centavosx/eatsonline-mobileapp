@@ -1,25 +1,12 @@
 import React, { useState } from 'react'
 import 'react-native-gesture-handler'
-import {
-  View,
-  SafeAreaView,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-} from 'react-native'
+import { View, Text, StyleSheet, Image } from 'react-native'
 import Swiper from 'react-native-swiper'
 import Entypo from 'react-native-vector-icons/Entypo'
 import { addCart } from './Featured'
-import {
-  FlatList,
-  ScrollView,
-  TextInput,
-  TouchableHighlight,
-} from 'react-native-gesture-handler'
+import { FlatList, TouchableHighlight } from 'react-native-gesture-handler'
 import Icon from 'react-native-vector-icons/MaterialIcons'
-import categories from '../Components/Categories'
-import food from '../Components/Food'
+
 import { screenWidth } from '../Components/Dimension'
 import axios from 'axios'
 import socket from '../../socket'
@@ -184,7 +171,9 @@ const Home = ({ navigation, cart, header }) => {
         }}
       >
         <View style={styles.header}>
-          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Home</Text>
+          <Text style={{ fontSize: 20, fontWeight: 'bold' }}>
+            Welcome to Eats Online
+          </Text>
         </View>
         <View style={styles.slider}>
           <View style={styles.sliderContainer}>

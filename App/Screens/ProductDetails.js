@@ -250,7 +250,9 @@ const ProductDetails = ({ navigation, route }) => {
                 >
                   {item.title}
                 </Text>
-                {!cartV.includes(decrypt(item.productid)) ? (
+                {!cartV.includes(
+                  item.productid ? decrypt(item.productid) : null
+                ) ? (
                   <View
                     style={{
                       fontWeight: 'bold',
@@ -301,7 +303,7 @@ const ProductDetails = ({ navigation, route }) => {
                   <Text>In Cart</Text>
                 )}
               </View>
-              <Text style={styles.price}>Php{item.price.toFixed(2)}</Text>
+              <Text style={styles.price}>Php{item.price?.toFixed(2) ?? 0}</Text>
               <View style={{ flexDirection: 'row' }}>
                 <View
                   style={{
@@ -398,7 +400,7 @@ const ProductDetails = ({ navigation, route }) => {
           paddingHorizontal: 10,
         }}
       >
-        {!cartV.includes(decrypt(item.productid)) ? (
+        {!cartV.includes(item.productid ? decrypt(item.productid) : null) ? (
           <SecondaryButton
             cart={true}
             title="Add To Cart"

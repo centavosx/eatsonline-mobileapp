@@ -1,20 +1,12 @@
 import React, { useState } from 'react'
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  StyleSheet,
-  TextInput,
-} from 'react-native'
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native'
 
 import image1 from '../../assets/EOLogoYellowGlow.png'
 import FormInput from '../Components/FormInput'
 import FormButton from '../Components/FormButton'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
+
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { windowWidth } from '../Components/Dimension'
+
 import { decryptJSON, decrypt, encrypt, encryptJSON } from '../../Encryption'
 import axios from 'axios'
 import { useFocusEffect } from '@react-navigation/native'
@@ -126,9 +118,6 @@ const Login = ({ navigation, setLogin }) => {
           Don't have an acount? Sign Up
         </Text>
       </TouchableOpacity>
-      {/* <TouchableOpacity style={styles.buttonContainer}>
-                <Text style={styles.buttonText} onPress={() => navigation.navigate("Profile")}>Back</Text>
-            </TouchableOpacity> */}
     </View>
   )
 }

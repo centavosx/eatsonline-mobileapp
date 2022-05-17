@@ -11,17 +11,22 @@ import {
   ScrollView,
   Image,
 } from 'react-native'
-import { ScreenStackHeaderBackButtonImage } from 'react-native-screens'
-import Icon from 'react-native-vector-icons/MaterialIcons'
+
 import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
 import { dataFire, storage } from '../../firebase/firebasecon'
-import { PrimaryButton, SecondaryButton } from '../Components/Button'
-import FormInput from '../Components/FormInput'
+import { SecondaryButton } from '../Components/Button'
 import * as ImagePicker from 'expo-image-picker'
+import socket from '../../socket'
+import sha256 from 'crypto-js/sha256'
 const Profile = ({ navigation, setLogin, user }) => {
   const [index, setIndex] = useState(0)
   const [valueAdd, setValueAdd] = useState('')
   const [loading, setLoading] = useState(false)
+  const [name, setName] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirm] = useState('')
+  const [edit, setEdit] = useState(false)
   React.useEffect(async () => {
     if (Platform.OS !== 'web') {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync()
@@ -30,6 +35,12 @@ const Profile = ({ navigation, setLogin, user }) => {
       }
     }
   }, [])
+  const resetAll = () => {
+    setName('')
+    setPhoneNumber('')
+    setPassword('')
+    setConfirm('')
+  }
   const logout = async () => {
     await AsyncStorage.removeItem('id')
     setLogin(false)
@@ -130,6 +141,63 @@ const Profile = ({ navigation, setLogin, user }) => {
       )}`
     )
   }
+
+  const validatePass = () => {
+    let re = /[A-Z]/
+    let re2 = /[a-z]/
+    let re3 = /[!@#$%^&*\(\)_+\}\{\":?><|~\.\-]/
+    let re4 = /[0-9]/
+    return !(
+      !re.test(password) ||
+      !re2.test(password) ||
+      !re3.test(password) ||
+      !re4.test(password) ||
+      password.length < 8
+    )
+  }
+
+  const checkP = () => {
+    return password.length > 0 && validatePass()
+      ? password === confirmPassword
+      : false
+  }
+
+  const checkName = () => {
+    return password.length > 0 && name.length > 0
+      ? checkP() && !(name === user.name)
+      : name.length > 0 && phoneNumber.length > 0
+      ? checkNumber()
+        ? !(name === user.name)
+        : false
+      : name.length > 0
+      ? !(name === user.name)
+      : false
+  }
+  const updateUserData = async () => {
+    let updateData = {}
+    if (name.length > 0 && name !== user.name) updateData.name = name
+    if (password.length > 0) updateData.password = sha256(password).toString()
+    if (phoneNumber.length > 0 && phoneNumber !== user.phoneNumber)
+      updateData.phoneNumber = phoneNumber
+    console.log(updateData)
+    await axios.patch(
+      'https://eats-apionline.herokuapp.com/api/v1/profileData',
+      encryptJSON({
+        id: await AsyncStorage.getItem('id'),
+        updateData: updateData,
+      })
+    )
+    setEdit(false)
+  }
+  const checkNumber = () => {
+    let c = /^\+?\d+$/
+    return password.length > 0 && phoneNumber.length > 0
+      ? checkP() && !(phoneNumber === user.phoneNumber)
+      : phoneNumber.length > 10
+      ? c.test(phoneNumber) && !(phoneNumber === user.phoneNumber)
+      : false
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: 'yellow' }}>
       <View
@@ -234,13 +302,19 @@ const Profile = ({ navigation, setLogin, user }) => {
                 <View style={{ position: 'absolute', right: 1 }}>
                   <TouchableOpacity
                     style={{
-                      backgroundColor: '#abdcdc',
+                      backgroundColor: !edit ? '#abdcdc' : 'red',
                       paddingHorizontal: 10,
                       paddingVertical: 3,
                       borderRadius: 10,
                     }}
+                    onPress={() => {
+                      if (!edit) resetAll()
+                      setEdit(!edit)
+                    }}
                   >
-                    <Text>Edit</Text>
+                    <Text style={{ color: !edit ? 'black' : 'white' }}>
+                      {!edit ? 'Edit' : 'Cancel'}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>
@@ -256,9 +330,25 @@ const Profile = ({ navigation, setLogin, user }) => {
                 >
                   Name:
                 </Text>
-                <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
-                  {user.name}
-                </Text>
+                {!edit ? (
+                  <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                    {user.name}
+                  </Text>
+                ) : (
+                  <TextInput
+                    placeholder={user.name}
+                    style={{
+                      fontWeight: 'normal',
+                      marginLeft: 6,
+                      borderWidth: 1,
+                      marginTop: 5,
+                      paddingHorizontal: 7,
+                      borderColor: 'lightgrey',
+                    }}
+                    value={name}
+                    onChangeText={(v) => setName(v)}
+                  />
+                )}
               </View>
               <View
                 style={{
@@ -308,10 +398,154 @@ const Profile = ({ navigation, setLogin, user }) => {
                 >
                   Phone Number:
                 </Text>
-                <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
-                  {user.phoneNumber}
-                </Text>
+                {!edit ? (
+                  <Text style={{ fontWeight: 'normal', marginLeft: 6 }}>
+                    {user.phoneNumber}
+                  </Text>
+                ) : (
+                  <TextInput
+                    placeholder={user.phoneNumber}
+                    style={{
+                      fontWeight: 'normal',
+                      marginTop: 5,
+                      marginLeft: 6,
+                      borderWidth: 1,
+                      paddingHorizontal: 7,
+                      borderColor: 'lightgrey',
+                    }}
+                    value={phoneNumber}
+                    onChangeText={(v) => setPhoneNumber(v)}
+                  />
+                )}
               </View>
+              {edit ? (
+                <>
+                  <View
+                    style={{
+                      width: '200%',
+                      height: 2,
+                      backgroundColor: '#F0EEF6',
+                      marginLeft: -100,
+                      marginVertical: 5,
+                    }}
+                  ></View>
+
+                  <View
+                    style={{
+                      width: '100%',
+                      paddingTop: 5,
+                      paddingBottom: 5,
+                      paddingHorizontal: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: 'bold',
+                        fontSize: 11,
+                        marginRight: 6,
+                      }}
+                    >
+                      Edit Password
+                    </Text>
+
+                    <TextInput
+                      placeholder="Type new password"
+                      style={{
+                        fontWeight: 'normal',
+                        marginLeft: 6,
+                        borderWidth: 1,
+                        marginTop: 5,
+                        paddingHorizontal: 7,
+                        borderColor: 'lightgrey',
+                      }}
+                      value={password}
+                      onChangeText={(v) => setPassword(v)}
+                    />
+                  </View>
+                </>
+              ) : null}
+              {edit && password.length > 0 ? (
+                <>
+                  <View
+                    style={{
+                      width: '200%',
+                      height: 2,
+                      backgroundColor: '#F0EEF6',
+                      marginLeft: -100,
+                      marginVertical: 5,
+                    }}
+                  ></View>
+                  <View
+                    style={{
+                      width: '100%',
+                      paddingTop: 5,
+                      paddingBottom: 5,
+                      paddingHorizontal: 10,
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontWeight: 'bold',
+                        fontSize: 11,
+                        marginRight: 6,
+                      }}
+                    >
+                      Confirm Password
+                    </Text>
+
+                    <TextInput
+                      placeholder="Type confirm password"
+                      style={{
+                        fontWeight: 'normal',
+                        marginLeft: 6,
+                        borderWidth: 1,
+                        marginTop: 5,
+                        paddingHorizontal: 7,
+                        borderColor: 'lightgrey',
+                      }}
+                      value={confirmPassword}
+                      onChangeText={(v) => setConfirm(v)}
+                    />
+                  </View>
+                </>
+              ) : null}
+              {edit ? (
+                <>
+                  <View
+                    style={{
+                      width: '200%',
+                      height: 2,
+                      backgroundColor: '#F0EEF6',
+                      marginLeft: -100,
+                      marginVertical: 5,
+                    }}
+                  ></View>
+                  <View style={{ width: '100%' }}>
+                    <Text style={{ fontWeight: 'bold', fontSize: 16 }}></Text>
+                    <View style={{ position: 'absolute', right: 1 }}>
+                      <TouchableOpacity
+                        style={{
+                          backgroundColor:
+                            checkP() || checkName() || checkNumber()
+                              ? 'green'
+                              : 'grey',
+                          paddingHorizontal: 10,
+                          paddingVertical: 3,
+                          borderRadius: 10,
+                        }}
+                        onPress={() => {
+                          if (checkP() || checkName() || checkNumber())
+                            updateUserData()
+                        }}
+                      >
+                        <Text style={{ color: !edit ? 'black' : 'white' }}>
+                          Save
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
+              ) : null}
             </View>
             <View
               style={{
@@ -374,8 +608,7 @@ const Profile = ({ navigation, setLogin, user }) => {
                     key={i}
                   >
                     <Text style={{ width: '70%' }}>
-                      {i + 1}. {data[1].address}{' '}
-                      adwadwadwadwadwdwadwadawddddddddddddddddddddddddwadawd
+                      {i + 1}. {data[1].address}
                     </Text>
                     <View style={{ width: '30%' }}>
                       {data[1].primary ? (
@@ -437,74 +670,10 @@ const Profile = ({ navigation, setLogin, user }) => {
             />
           </Tab>
           <Tab selected={index === 1} key={1}>
-            <ScrollView>
-              <View style={{ flexDirection: 'row', marginBottom: 18 }}>
-                <Text
-                  style={{
-                    fontSize: 15,
-                    color: 'black',
-                    width: '100%',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Order History
-                </Text>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: 'darkgray',
-                    paddingHorizontal: 10,
-                    paddingVertical: 6,
-                    borderRadius: 10,
-                    fontSize: 15,
-                    color: 'black',
-                    // width: '50%',
-                    fontWeight: 'bold',
-                    textAlign: 'right',
-
-                    position: 'absolute',
-                    right: 1,
-                  }}
-                >
-                  <Text>Newest to Oldest</Text>
-                </TouchableOpacity>
-              </View>
-              <CardTransaction />
-              <CardTransaction />
-            </ScrollView>
+            <LoadTransact transaction={true} navigation={navigation} />
           </Tab>
           <Tab selected={index === 2} key={2}>
-            <ScrollView>
-              <View style={{ flexDirection: 'row', marginBottom: 18 }}>
-                <Text
-                  style={{
-                    fontSize: 15,
-                    color: 'black',
-                    width: '100%',
-                    fontWeight: 'bold',
-                  }}
-                >
-                  Advance Order History
-                </Text>
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: 'darkgray',
-                    paddingHorizontal: 10,
-                    paddingVertical: 6,
-                    borderRadius: 10,
-                    fontSize: 15,
-                    color: 'black',
-                    // width: '50%',
-                    fontWeight: 'bold',
-                    textAlign: 'right',
-
-                    position: 'absolute',
-                    right: 1,
-                  }}
-                >
-                  <Text>Newest to Oldest</Text>
-                </TouchableOpacity>
-              </View>
-            </ScrollView>
+            <LoadTransact transaction={false} navigation={navigation} />
           </Tab>
         </ScrollView>
       </View>
@@ -532,13 +701,13 @@ const CardTransaction = (props) => (
       >
         <Text
           style={{
-            fontSize: 16,
+            fontSize: 14,
             color: 'black',
 
             fontWeight: 'bold',
           }}
         >
-          Order No. ex01234
+          Order ID: {props.id}
         </Text>
         <Text
           style={{
@@ -547,14 +716,23 @@ const CardTransaction = (props) => (
             // left: 100,
             fontSize: 15,
             textAlign: 'right',
-            color: '#abdcdc',
+            color:
+              props.status === 'Pending'
+                ? '#406b00'
+                : props.status === 'Processing'
+                ? '#abdcdc'
+                : props.status === 'Delivering'
+                ? 'blue'
+                : props.status === 'Completed'
+                ? 'green'
+                : 'red',
             fontWeight: 'bold',
           }}
         >
-          Pending
+          {props.status}
         </Text>
       </View>
-      <View
+      <TouchableOpacity
         style={{
           flexDirection: 'row',
           width: '100%',
@@ -580,11 +758,11 @@ const CardTransaction = (props) => (
             color: 'darkgray',
             textDecorationLine: 'underline',
           }}
-          onPress={() => Linking.openURL('http://google.com')} //google po muna nilagay ko po
+          onPress={props.view} //google po muna nilagay ko po
         >
           View ►
         </Text>
-      </View>
+      </TouchableOpacity>
       <View
         style={{
           flexDirection: 'row',
@@ -609,7 +787,7 @@ const CardTransaction = (props) => (
             color: 'darkgray',
           }}
         >
-          1
+          {props.item}
         </Text>
       </View>
       <View
@@ -638,7 +816,7 @@ const CardTransaction = (props) => (
             right: 1,
           }}
         >
-          Sun, May 15, 2022 12:04PM
+          {props.date}
         </Text>
       </View>
       <View
@@ -649,18 +827,31 @@ const CardTransaction = (props) => (
         }}
       >
         {/* pati po dito sa button po na ito */}
-
-        <TouchableOpacity
-          style={{
-            backgroundColor: '#abdcdc',
-            paddingHorizontal: 15,
-            paddingVertical: 6,
-            borderRadius: 10,
-            fontSize: 12,
-          }}
-        >
-          <Text>Cancel</Text>
-        </TouchableOpacity>
+        {props.status === 'Pending' || props.status === 'Processing' ? (
+          <TouchableOpacity
+            style={{
+              backgroundColor: 'red',
+              paddingHorizontal: 15,
+              paddingVertical: 6,
+              borderRadius: 10,
+              fontSize: 12,
+            }}
+            onPress={
+              props.status === 'Pending' || props.status === 'Processing'
+                ? props.cancel
+                : null
+            }
+          >
+            <Text style={{ color: 'white' }}>Cancel</Text>
+          </TouchableOpacity>
+        ) : (
+          <View
+            style={{
+              paddingHorizontal: 15,
+              paddingVertical: 17,
+            }}
+          ></View>
+        )}
         <Text
           style={{
             marginTop: 3,
@@ -672,12 +863,116 @@ const CardTransaction = (props) => (
             textAlign: 'right',
           }}
         >
-          Order Total: ₱ 150.00
+          Order Total: ₱{props.total.toFixed(2)}
         </Text>
       </View>
     </View>
   </>
 )
+
+const LoadTransact = (props) => {
+  const [data, setData] = useState([])
+  const [reverse, setReverse] = useState(false)
+  React.useEffect(async () => {
+    const response = await axios.get(
+      `https://eats-apionline.herokuapp.com/api/v1/getTransactions?data=${JSON.stringify(
+        encryptJSON({
+          id: await AsyncStorage.getItem('id'),
+          transaction: props.transaction ? 'transaction' : 'reservation',
+        })
+      )}`
+    )
+    response.data = decryptJSON(response.data.data)
+    setData(response.data.data)
+    socket.on(
+      `${props.transaction ? 'transaction-all' : 'reservation-all'}/${decrypt(
+        await AsyncStorage.getItem('id')
+      )}`,
+      (data) => {
+        if (reverse) {
+          data.reverse()
+        }
+        setData(data)
+      }
+    )
+  }, [])
+  const Cancel = async (id) => {
+    await axios.patch(
+      'https://eats-apionline.herokuapp.com/api/v1/cancelorder',
+      encryptJSON({
+        id: await AsyncStorage.getItem('id'),
+        ref: props.transaction ? 'transaction' : 'reservation',
+        reason: '',
+        key: id,
+      })
+    )
+  }
+  const sort = () => {
+    const v = data
+    v.reverse()
+    setData(v)
+    setReverse(!reverse)
+  }
+  return (
+    <ScrollView>
+      <View style={{ flexDirection: 'row', marginBottom: 18 }}>
+        <Text
+          style={{
+            fontSize: 15,
+            color: 'black',
+            width: '100%',
+            fontWeight: 'bold',
+          }}
+        >
+          Order History
+        </Text>
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'darkgray',
+            paddingHorizontal: 10,
+            paddingVertical: 6,
+            borderRadius: 10,
+            fontSize: 15,
+            color: 'black',
+            // width: '50%',
+            fontWeight: 'bold',
+            textAlign: 'right',
+
+            position: 'absolute',
+            right: 1,
+          }}
+          onPress={() => sort()}
+        >
+          <Text>{!reverse ? 'Newest to Oldest' : 'Oldest To Newest'}</Text>
+        </TouchableOpacity>
+      </View>
+      {data.map((d, i) => (
+        <CardTransaction
+          key={i}
+          id={d[1].id}
+          item={d[1].items.length}
+          status={d[1].status}
+          total={d[1].totalprice}
+          date={
+            new Date(d[1].dateBought).toDateString() +
+            ' ' +
+            new Date(d[1].dateBought).toLocaleTimeString()
+          }
+          view={() =>
+            props.navigation.navigate('Transaction', {
+              data: {
+                keyid: d[0],
+                what: props.transaction ? 'transaction' : 'reservation',
+                ...d[1],
+              },
+            })
+          }
+          cancel={() => Cancel(d[0])}
+        />
+      ))}
+    </ScrollView>
+  )
+}
 
 const Tab = (props) => <>{props.selected ? props.children : null}</>
 

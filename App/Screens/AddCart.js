@@ -19,7 +19,7 @@ import axios from 'axios'
 import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
-const AddCart = ({ navigation, header }) => {
+const AddCart = ({ navigation, header, data }) => {
   const [deleteC, setItemsToDelete] = useState([])
   const [cart, setCart] = useState([])
   const [dataAmt, setdataAmt] = useState({})
@@ -33,7 +33,6 @@ const AddCart = ({ navigation, header }) => {
     }, [])
   )
   const getCart = async () => {
-    AsyncStorage
     const resp = await axios.get(
       `https://eats-apionline.herokuapp.com/api/v1/cart?data=${JSON.stringify(
         encryptJSON({
@@ -46,9 +45,26 @@ const AddCart = ({ navigation, header }) => {
     if (!resp.data.error) {
       if (resp.data.success) {
         let obj = {}
+        let checkArr = []
         for (let x of resp.data.data) {
           obj[x[0]] = x[1].amount
+          checkArr.push(x[0])
         }
+        let newSelect = { ...select }
+        let newtotal = totalamount
+        Object.keys(newSelect).forEach((d) => {
+          if (!checkArr.includes(d)) {
+            newtotal -=
+              'discount' in newSelect[d]
+                ? (newSelect[d].price -
+                    (newSelect[d].discount * newSelect[d].price) / 100) *
+                  newSelect[d].amount
+                : x[1].price * newSelect[d].amount
+            delete newSelect[d]
+          }
+        })
+        setTotalAmount(newtotal)
+        setSelect(newSelect)
         setdataAmt(obj)
         setCart(resp.data.data)
       }
@@ -173,7 +189,7 @@ const AddCart = ({ navigation, header }) => {
     setSelect(select)
     setTotalAmount(totalvalue)
   }
-
+  const checkSelected = () => {}
   const CartCard = ({ item, id }) => {
     return (
       <TouchableOpacity
@@ -275,62 +291,66 @@ const AddCart = ({ navigation, header }) => {
           borderTopRightRadius: 25,
         }}
       >
-        <ScrollView
-          style={{ flex: 1, paddingVertical: 15, marginBottom: 20 }}
+        <FlatList
           showsVerticalScrollIndicator={false}
-        >
-          <FlatList
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 30 }}
-            data={cart}
-            renderItem={({ item }) => <CartCard item={item[1]} id={item[0]} />}
-            ListFooterComponentStyle={{ paddingHorizontal: 20, marginTop: 20 }}
-            ListFooterComponent={() => (
-              <View>
-                <View
-                  style={{
-                    flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    marginVertical: 15,
-                  }}
-                >
-                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                    Total Price
-                  </Text>
-                  <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
-                    ₱{totalamount.toFixed(2)}
-                  </Text>
+          contentContainerStyle={{ paddingBottom: 30 }}
+          style={{ flex: 1, paddingVertical: 15, marginBottom: 20 }}
+          data={cart}
+          renderItem={({ item, i }) => (
+            <CartCard item={item[1]} id={item[0]} key={i} />
+          )}
+          ListFooterComponentStyle={{ paddingHorizontal: 20, marginTop: 20 }}
+          ListFooterComponent={(v, i) => (
+            <View key={i}>
+              <View
+                style={{
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  marginVertical: 15,
+                }}
+              >
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                  Total Price
+                </Text>
+                <Text style={{ fontSize: 18, fontWeight: 'bold' }}>
+                  ₱{totalamount.toFixed(2)}
+                </Text>
+              </View>
+              <View style={{ flexDirection: 'row' }}>
+                <View style={{ marginHorizontal: 30 }}>
+                  <PrimaryButton
+                    title="DELETE"
+                    fontstyles={{ fontSize: 14, color: 'white' }}
+                    styles={{
+                      paddingVertical: 10,
+                      paddingHorizontal: 15,
+                      backgroundColor: 'red',
+                    }}
+                    onPress={async () =>
+                      deleteC.length > 0 ? await deleteItem(deleteC) : null
+                    }
+                  />
                 </View>
-                <View style={{ flexDirection: 'row' }}>
-                  <View style={{ marginHorizontal: 30 }}>
-                    <PrimaryButton
-                      title="DELETE"
-                      fontstyles={{ fontSize: 14, color: 'white' }}
-                      styles={{
-                        paddingVertical: 10,
-                        paddingHorizontal: 15,
-                        backgroundColor: 'red',
-                      }}
-                      onPress={async () =>
-                        deleteC.length > 0 ? await deleteItem(deleteC) : null
-                      }
-                    />
-                  </View>
-                  <View style={{ marginHorizontal: 30 }}>
-                    <PrimaryButton
-                      title="CHECKOUT"
-                      fontstyles={{ fontSize: 14 }}
-                      styles={{ paddingVertical: 10, paddingHorizontal: 15 }}
-                      onPress={() =>
-                        navigation.navigate('Checkout', { data: {} })
-                      }
-                    />
-                  </View>
+                <View style={{ marginHorizontal: 30 }}>
+                  <PrimaryButton
+                    title="CHECKOUT"
+                    fontstyles={{ fontSize: 14 }}
+                    styles={{ paddingVertical: 10, paddingHorizontal: 15 }}
+                    onPress={() =>
+                      navigation.navigate('Checkout', {
+                        data: {},
+                        items: select,
+                        total: totalamount,
+                        name: data.name,
+                        phone: data.phone,
+                      })
+                    }
+                  />
                 </View>
               </View>
-            )}
-          />
-        </ScrollView>
+            </View>
+          )}
+        />
       </View>
     </View>
   )

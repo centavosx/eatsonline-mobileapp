@@ -5,8 +5,6 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
-  TextInput,
   ScrollView,
   Image,
 } from 'react-native'
@@ -51,7 +49,23 @@ export default function Notification({ navigation, notifications, header }) {
               style={{ width: '100%' }}
             >
               <View style={styles.card} key={index}>
-                <Text style={styles.userName}>{data[1].status}</Text>
+                <Text
+                  style={{
+                    ...styles.userName,
+                    color:
+                      data[1].status === 'Pending'
+                        ? '#406b00'
+                        : data[1].status === 'Processing'
+                        ? '#abdcdc'
+                        : data[1].status === 'Delivering'
+                        ? 'blue'
+                        : data[1].status === 'Completed'
+                        ? 'green'
+                        : 'red',
+                  }}
+                >
+                  {data[1].status}
+                </Text>
                 <Text style={{ fontWeight: 'bold', ...styles.result }}>
                   Your order is now{' '}
                   {data[1].status === 'Delivering'

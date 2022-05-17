@@ -19,6 +19,7 @@ const Checkout = ({ navigation }) => {
     socket.emit('chat', id)
     socket.emit('updateChat', id)
     socket.on(`chatchanged/${id}`, (newchat) => {
+      console.log(newchat)
       const chat2 = newchat.map((data, index) => ({
         _id: index,
         createdAt: new Date(data[1].date),

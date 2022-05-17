@@ -1,6 +1,5 @@
-import React, { useState } from 'react'
-import { View, Text, TouchableOpacity, Image, StyleSheet } from 'react-native'
-import AntDesign from 'react-native-vector-icons/AntDesign'
+import React from 'react'
+import { View, Text, Image, StyleSheet } from 'react-native'
 import image1 from '../../assets/EOLogoYellowGlow.png'
 const Loading = () => {
   return (
