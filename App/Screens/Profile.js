@@ -8,6 +8,7 @@ import {
   StyleSheet,
   SafeAreaView,
   TextInput,
+  NumberInput,
   ScrollView,
   Image,
 } from 'react-native'
@@ -64,6 +65,10 @@ const Profile = ({ navigation, setLogin, user }) => {
       )
       setValueAdd('')
     }
+  }
+  const checkPhone = (v) => {
+    let c = /^(09)\d+$/
+    return v.toString().length > 10 ? c.test(v) : false
   }
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -190,14 +195,24 @@ const Profile = ({ navigation, setLogin, user }) => {
     setEdit(false)
   }
   const checkNumber = () => {
-    let c = /^\+?\d+$/
+    let c = /^(09)\d+$/
     return password.length > 0 && phoneNumber.length > 0
       ? checkP() && !(phoneNumber === user.phoneNumber)
       : phoneNumber.length > 10
       ? c.test(phoneNumber) && !(phoneNumber === user.phoneNumber)
       : false
   }
+  const checkNum = (v) => {
+    let ch = true
 
+    for (let x of v) {
+      if (!'01234567890'.includes(x)) {
+        ch = false
+        break
+      }
+    }
+    return ch
+  }
   return (
     <View style={{ flex: 1, backgroundColor: 'yellow' }}>
       <View
@@ -403,6 +418,8 @@ const Profile = ({ navigation, setLogin, user }) => {
                     {user.phoneNumber}
                   </Text>
                 ) : (
+                  // ginawa ko pong number input para po number lang tatanggapin po
+                  //wait
                   <TextInput
                     placeholder={user.phoneNumber}
                     style={{
@@ -413,12 +430,15 @@ const Profile = ({ navigation, setLogin, user }) => {
                       paddingHorizontal: 7,
                       borderColor: 'lightgrey',
                     }}
+                    keyboardType="numeric"
                     value={phoneNumber}
-                    onChangeText={(v) => setPhoneNumber(v)}
+                    onChangeText={(v) =>
+                      checkNum(v) ? setPhoneNumber(v) : null
+                    }
                   />
                 )}
               </View>
-              {edit ? (
+              {edit && !user.guest ? (
                 <>
                   <View
                     style={{

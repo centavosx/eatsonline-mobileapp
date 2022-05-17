@@ -13,15 +13,19 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/EOLogoYellowGlow.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.qvlbllanto.EatsOnlineApp"
     },
     "web": {
       "favicon": "./assets/EOLogoYellowGlow.png"

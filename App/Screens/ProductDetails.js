@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native'
+import { Picker } from '@react-native-picker/picker'
 import Icon from 'react-native-vector-icons/MaterialIcons'
 import Entypo from 'react-native-vector-icons/Entypo'
 import { addCart, createStars } from './Featured'
@@ -304,6 +305,9 @@ const ProductDetails = ({ navigation, route }) => {
                 )}
               </View>
               <Text style={styles.price}>Php{item.price?.toFixed(2) ?? 0}</Text>
+              <Text style={{ ...styles.price, fontSize: 12 }}>
+                {item.numberofitems} stock
+              </Text>
               <View style={{ flexDirection: 'row' }}>
                 <View
                   style={{
@@ -339,6 +343,50 @@ const ProductDetails = ({ navigation, route }) => {
                   Description
                 </Text>
                 <Text style={styles.detailText}>{item.description}</Text>
+              </View>
+              <View
+                style={{
+                  width: '200%',
+                  left: -100,
+                  height: 2,
+                  backgroundColor: 'lightgrey',
+                }}
+              ></View>
+              <View style={{ paddingVertical: 5 }}>
+                <Text style={{ ...styles.detailText1, fontWeight: 'bold' }}>
+                  Advance Order Dates
+                </Text>
+                <Picker
+                  style={{
+                    width: '100%',
+                    borderWidth: 1,
+                    borderColor: 'black',
+                    marginTop: -10,
+                  }}
+                >
+                  <Picker.Item
+                    key={-1}
+                    label="Check dates"
+                    style={{
+                      fontSize: 12,
+                      backgroundColor: 'red',
+                    }}
+                    value=""
+                  />
+                  {item.adv
+                    ? Object.keys(item.adv).map((data, indx) => (
+                        <Picker.Item
+                          key={indx}
+                          label={new Date(item.adv[data].date).toDateString()}
+                          style={{
+                            fontSize: 12,
+                            backgroundColor: 'red',
+                          }}
+                          value={new Date(item.adv[data].date).toDateString()}
+                        />
+                      ))
+                    : null}
+                </Picker>
               </View>
               <View
                 style={{

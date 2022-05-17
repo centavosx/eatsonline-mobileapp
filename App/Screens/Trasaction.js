@@ -224,6 +224,23 @@ const Transaction = ({ navigation, route }) => {
                 second={data.id}
               />
               <Item
+                first="Order Method"
+                style={{
+                  flexDirection: 'row',
+                  left: -8,
+                }}
+                widthleft="30%"
+                widthright="70%"
+                rightweight="normal"
+                size={12}
+                color="black"
+                weight="bold"
+                key={'c'}
+                second={
+                  data.what === 'transaction' ? 'Order Now' : 'Advance Order'
+                }
+              />
+              <Item
                 first="Order Status"
                 style={{
                   flexDirection: 'row',

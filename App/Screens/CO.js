@@ -23,6 +23,7 @@ const Checkout = ({ navigation, route }) => {
   const [cod, setCOD] = useState(false)
   const [dates, setDates] = useState({})
   const [message, setMessage] = useState('')
+  const [ordering, setOrdering] = useState(false)
   const data = route.params
   React.useEffect(async () => {
     const response = await axios.get(
@@ -78,50 +79,62 @@ const Checkout = ({ navigation, route }) => {
     setMessage(!resp.data.data)
     return resp.data.data
   }
+  const checkItem = (v) => {
+    let x = true
+
+    Object.keys(v).forEach((data) => {
+      if (!(v[data].numberofitems >= v[data].amount)) x = false
+    })
+    return x
+  }
   const orderNow = async () => {
-    if (checkToContinue()) {
-      const obj = {
-        name: data.name,
-        address: selectedAdd,
-        phone: data.phone,
-        items: Object.keys(data.items).map((d) => {
-          const ob = { ...data.items[d] }
-          delete ob['adv']
-          delete ob['comments']
-          ob.date = dates[d]
-          return [d, ob]
-        }),
-        payment: cod ? 'C.O.D' : 'Online Payment',
-        totalprice: data.total,
-        userid: await AsyncStorage.getItem('id'),
-        message: message,
-      }
+    try {
+      setOrdering(true)
+      if (checkToContinue()) {
+        const obj = {
+          name: data.name,
+          address: selectedAdd,
+          phone: data.phone,
+          items: Object.keys(data.items).map((d) => {
+            const ob = { ...data.items[d] }
+            delete ob['adv']
+            delete ob['comments']
+            ob.date = dates[d]
+            return [d, ob]
+          }),
+          payment: cod ? 'C.O.D' : 'Online Payment',
+          totalprice: data.total,
+          userid: await AsyncStorage.getItem('id'),
+          message: message,
+        }
 
-      const resp = await axios.post(
-        'https://eats-apionline.herokuapp.com/api/v1/transact',
-        encryptJSON({
-          data: obj,
-          advance: order,
-        })
-      )
-
-      resp.data = decryptJSON(resp.data.data)
-
-      if (!resp.data.error) {
-        if (resp.data.completed) {
-          navigation.navigate('Transaction', {
-            data: {
-              keyid: resp.data.data.iditem,
-              what: resp.data.data.what,
-              ...resp.data.data,
-            },
+        const resp = await axios.post(
+          'https://eats-apionline.herokuapp.com/api/v1/transact',
+          encryptJSON({
+            data: obj,
+            advance: order,
           })
-          navigation.goBack()
-        } else {
-          alert(resp.data.message.map((data) => data + '\n'))
+        )
+
+        resp.data = decryptJSON(resp.data.data)
+
+        if (!resp.data.error) {
+          if (resp.data.completed) {
+            navigation.pop()
+            navigation.navigate('Transaction', {
+              data: {
+                keyid: resp.data.data.iditem,
+                what: resp.data.data.what,
+                ...resp.data.data,
+              },
+            })
+          } else {
+            alert(resp.data.message.map((data) => data + '\n'))
+          }
         }
       }
-    }
+    } catch {}
+    setOrdering(false)
   }
 
   return (
@@ -321,19 +334,21 @@ const Checkout = ({ navigation, route }) => {
                 fontsize={16}
                 image={require('../../assets/shipping.png')}
               />
-              <View style={{ flexDirection: 'row', left: -8 }}>
-                <View style={{ width: '15%' }}></View>
-                <View style={{ width: '85%', flexDirection: 'row' }}>
-                  <RadioButton
-                    color="yellow"
-                    width={15}
-                    height={15}
-                    selected={order === false}
-                    onClick={() => setOrder(false)}
-                  />
-                  <Text style={{ top: -4, marginLeft: 10 }}>Order now</Text>
+              {checkItem(data.items) ? (
+                <View style={{ flexDirection: 'row', left: -8 }}>
+                  <View style={{ width: '15%' }}></View>
+                  <View style={{ width: '85%', flexDirection: 'row' }}>
+                    <RadioButton
+                      color="yellow"
+                      width={15}
+                      height={15}
+                      selected={order === false}
+                      onClick={() => setOrder(false)}
+                    />
+                    <Text style={{ top: -4, marginLeft: 10 }}>Order now</Text>
+                  </View>
                 </View>
-              </View>
+              ) : null}
               <View style={{ flexDirection: 'row', left: -8, marginTop: 3 }}>
                 <View style={{ width: '15%' }}></View>
                 <View style={{ width: '85%', flexDirection: 'row' }}>
@@ -499,53 +514,55 @@ const Checkout = ({ navigation, route }) => {
                 paddingBottom: 20,
               }}
             >
-              <TouchableOpacity
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  backgroundColor:
-                    selectedAdd.length > 0
-                      ? order
-                        ? Object.keys(dates).length ===
-                          Object.keys(data.items).length
-                          ? 'yellow'
-                          : 'grey'
-                        : 'yellow'
-                      : 'grey',
-
-                  borderRadius: 20,
-                  padding: 8,
-                }}
-                onPress={async () =>
-                  selectedAdd.length > 0
-                    ? order
-                      ? Object.keys(dates).length ===
-                        Object.keys(data.items).length
-                        ? orderNow()
-                        : null
-                      : orderNow()
-                    : null
-                }
-              >
-                <Text
+              {!ordering ? (
+                <TouchableOpacity
                   style={{
-                    textAlign: 'center',
-                    fontSize: 28,
-                    fontWeight: 'bold',
-                    color:
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor:
                       selectedAdd.length > 0
                         ? order
                           ? Object.keys(dates).length ===
                             Object.keys(data.items).length
-                            ? 'black'
-                            : 'white'
-                          : 'black'
-                        : 'white',
+                            ? 'yellow'
+                            : 'grey'
+                          : 'yellow'
+                        : 'grey',
+
+                    borderRadius: 20,
+                    padding: 8,
                   }}
+                  onPress={async () =>
+                    selectedAdd.length > 0
+                      ? order
+                        ? Object.keys(dates).length ===
+                          Object.keys(data.items).length
+                          ? orderNow()
+                          : null
+                        : orderNow()
+                      : null
+                  }
                 >
-                  CHECKOUT
-                </Text>
-              </TouchableOpacity>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 28,
+                      fontWeight: 'bold',
+                      color:
+                        selectedAdd.length > 0
+                          ? order
+                            ? Object.keys(dates).length ===
+                              Object.keys(data.items).length
+                              ? 'black'
+                              : 'white'
+                            : 'black'
+                          : 'white',
+                    }}
+                  >
+                    CHECKOUT
+                  </Text>
+                </TouchableOpacity>
+              ) : null}
             </View>
           </View>
         </View>

@@ -162,10 +162,7 @@ export const ForgotPass = ({ navigation, setLogin, route }) => {
         onPress={async () => await resetP()}
       />
       <TouchableOpacity style={styles.forgotButton}>
-        <Text
-          style={styles.navButtonText}
-          onPress={() => navigation.navigate('Login')}
-        >
+        <Text style={styles.navButtonText} onPress={() => navigation.goBack()}>
           Back
         </Text>
       </TouchableOpacity>

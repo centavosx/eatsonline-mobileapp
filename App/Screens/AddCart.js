@@ -189,7 +189,6 @@ const AddCart = ({ navigation, header, data }) => {
     setSelect(select)
     setTotalAmount(totalvalue)
   }
-  const checkSelected = () => {}
   const CartCard = ({ item, id }) => {
     return (
       <TouchableOpacity
@@ -225,6 +224,9 @@ const AddCart = ({ navigation, header, data }) => {
               {item.title}
             </Text>
             <Text style={{ fontSize: 13, color: 'black' }}>{item.type}</Text>
+            <Text style={{ fontSize: 13, color: 'black' }}>
+              {item.numberofitems} in stock
+            </Text>
             <Text style={{ fontSize: 13, color: 'black' }}>{item.seller}</Text>
             <Text style={{ fontSize: 17, fontWeight: 'bold' }}>
               ₱{item.price}
@@ -369,7 +371,7 @@ const styles = StyleSheet.create({
     elevation: 3,
     borderRadius: 10,
     backgroundColor: 'white',
-    paddingBottom: 18,
+    paddingBottom: 38,
     marginVertical: 3,
     marginHorizontal: 10,
     paddingHorizontal: 3,

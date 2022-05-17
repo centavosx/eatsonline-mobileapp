@@ -98,7 +98,17 @@ const Registration = ({ navigation }) => {
       password.length >= 8
     )
   }
+  const checkNum = (v) => {
+    let ch = true
 
+    for (let x of v) {
+      if (!'01234567890'.includes(x)) {
+        ch = false
+        break
+      }
+    }
+    return ch
+  }
   const checkConfAndPass = (pass, pass2) => {
     return pass === pass2
   }
@@ -136,7 +146,9 @@ const Registration = ({ navigation }) => {
       />
       <FormInput
         labelValue={phoneNumber}
-        onChangeText={(phone) => setPhoneNumber(phone)}
+        onChangeText={(phone) =>
+          checkNum(phone) ? setPhoneNumber(phone) : null
+        }
         placeholderText="Phone Number (09123456780)"
         iconType="phone"
         avail={!checkPhone(phoneNumber)}
