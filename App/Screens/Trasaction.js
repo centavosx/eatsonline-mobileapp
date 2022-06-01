@@ -19,6 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
 import axios from 'axios'
 import { dataFire, storage } from '../../firebase/firebasecon'
+
 const Transaction = ({ navigation, route }) => {
   const ref = useRef()
   const [cancelOrder, setCancelOrder] = useState(false)
@@ -34,6 +35,13 @@ const Transaction = ({ navigation, route }) => {
       setSent({})
       setImage(false)
       getData()
+      if(route.params.data.cancelStatus){
+        setCancelOrder(true)
+        scrollToBottom();
+      } 
+       else{
+         setCancelOrder(false)
+      }
     }, [])
   )
   const pickImage = async () => {
@@ -684,8 +692,8 @@ const Transaction = ({ navigation, route }) => {
                       />
                       <Picker.Item
                         style={{ fontSize: 12 }}
-                        label="Sourcing payment issue"
-                        value="Sourcing payment issue"
+                        label="Request refund"
+                        value="Request refund"
                       />
                       <Picker.Item
                         style={{ fontSize: 12 }}
@@ -709,7 +717,7 @@ const Transaction = ({ navigation, route }) => {
                       />
 
               </Picker>
-              {reason === "Others"?
+              {reason === "Others" || reason === "Request refund"?
                 <View>
                   <TextInput 
                     placeholder="Enter your reason"
