@@ -28,11 +28,12 @@ import { useFocusEffect } from '@react-navigation/native'
 const cardWidth = screenWidth / 2 - 20
 export const addCart = async (id, num) => {
   await axios.post(
-    'https://eats-apionline.herokuapp.com/api/v1/addcart',
+    'https://eats-apionline.herokuapp.com/api/v1/newaddcart',
     encryptJSON({
       id: await AsyncStorage.getItem('id'),
       cartid: id,
       amount: num ? num : 1,
+      adv: false,
     })
   )
 }

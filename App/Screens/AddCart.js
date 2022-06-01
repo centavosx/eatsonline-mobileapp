@@ -26,22 +26,26 @@ const AddCart = ({ navigation, header, data }) => {
   const [select, setSelect] = useState({})
   const [totalamount, setTotalAmount] = useState(0)
   const [state, setState] = useState(false)
+  const [tab, setTab] = useState(true)
   useFocusEffect(
     React.useCallback(() => {
       header('Cart')
+
       getCart()
-    }, [])
+    }, [tab])
   )
   const getCart = async () => {
     const resp = await axios.get(
-      `https://eats-apionline.herokuapp.com/api/v1/cart?data=${JSON.stringify(
+      `https://eats-apionline.herokuapp.com/api/v1/newcart?data=${JSON.stringify(
         encryptJSON({
           id: await AsyncStorage.getItem('id'),
+          adv: !tab,
         })
       )}`
     )
 
     resp.data = decryptJSON(resp.data.data)
+    console.log(resp.data)
     if (!resp.data.error) {
       if (resp.data.success) {
         let obj = {}
@@ -52,6 +56,7 @@ const AddCart = ({ navigation, header, data }) => {
         }
         let newSelect = { ...select }
         let newtotal = totalamount
+        console.log(newSelect)
         Object.keys(newSelect).forEach((d) => {
           if (!checkArr.includes(d)) {
             newtotal -=
@@ -59,12 +64,13 @@ const AddCart = ({ navigation, header, data }) => {
                 ? (newSelect[d].price -
                     (newSelect[d].discount * newSelect[d].price) / 100) *
                   newSelect[d].amount
-                : x[1].price * newSelect[d].amount
+                : newSelect[d].price * newSelect[d].amount
             delete newSelect[d]
           }
         })
         setTotalAmount(newtotal)
         setSelect(newSelect)
+
         setdataAmt(obj)
         setCart(resp.data.data)
       }
@@ -72,7 +78,7 @@ const AddCart = ({ navigation, header, data }) => {
   }
   const deleteReq = async (keys) => {
     let resp = await axios.delete(
-      `https://eats-apionline.herokuapp.com/api/v1/cart?data=${JSON.stringify(
+      `https://eats-apionline.herokuapp.com/api/v1/newcart?data=${JSON.stringify(
         encryptJSON({
           id: await AsyncStorage.getItem('id'),
           keys,
@@ -143,7 +149,7 @@ const AddCart = ({ navigation, header, data }) => {
           obj[x[0]].key = x[1].key
         }
         await axios.patch(
-          'https://eats-apionline.herokuapp.com/api/v1/cart',
+          'https://eats-apionline.herokuapp.com/api/v1/newcart',
           encryptJSON({
             id: await AsyncStorage.getItem('id'),
             data: obj,
@@ -293,6 +299,7 @@ const AddCart = ({ navigation, header, data }) => {
           borderTopRightRadius: 25,
         }}
       >
+        <Tabs selectVal={(v) => setTab(v)} />
         <FlatList
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 30 }}
@@ -354,6 +361,54 @@ const AddCart = ({ navigation, header, data }) => {
           )}
         />
       </View>
+    </View>
+  )
+}
+
+const Tabs = (props) => {
+  const [tab, setTab] = useState(false)
+  React.useEffect(() => {
+    props.selectVal(tab)
+  }, [tab])
+  return (
+    <View
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        marginTop: 20,
+        justifyContent: 'center',
+        width: '100%',
+        paddingHorizontal: 10,
+      }}
+    >
+      <TouchableOpacity
+        style={{
+          borderWidth: 1,
+          borderColor: 'grey',
+          flex: 1,
+          alignItems: 'center',
+          borderTopLeftRadius: 10,
+          backgroundColor: tab ? 'yellow' : 'transparent',
+          padding: 5,
+        }}
+        onPress={() => setTab(true)}
+      >
+        <Text style={{ fontWeight: 'bold' }}>Order now</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          padding: 5,
+          borderColor: 'grey',
+          backgroundColor: !tab ? 'yellow' : 'transparent',
+          borderWidth: 1,
+          borderTopRightRadius: 10,
+        }}
+        onPress={() => setTab(false)}
+      >
+        <Text>Advance Order</Text>
+      </TouchableOpacity>
     </View>
   )
 }
