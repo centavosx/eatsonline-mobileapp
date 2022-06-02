@@ -345,15 +345,15 @@ const AddCart = ({ navigation, header, data }) => {
                     title="CHECKOUT"
                     fontstyles={{ fontSize: 14 }}
                     styles={{ paddingVertical: 10, paddingHorizontal: 15 }}
-                    onPress={() =>
-                      navigation.navigate('Checkout', {
+                    onPress={() => {console.log(Object.keys(select).length); Object.keys(select).length > 0 ? 
+                        navigation.navigate('Checkout', {
                         data: {},
                         items: select,
                         total: totalamount,
                         name: data.name,
                         phone: data.phone,
-                      })
-                    }
+                      }) : alert("Please select any product in your cart!");
+                    }}
                   />
                 </View>
               </View>

@@ -161,6 +161,7 @@ const Home = ({ navigation, cart, header }) => {
 
   //---------------------------USER INTERFACE--------------------------------
   return (
+    
     <View style={{ flex: 1, backgroundColor: 'yellow' }}>
       <View
         style={{

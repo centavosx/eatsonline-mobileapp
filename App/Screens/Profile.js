@@ -856,9 +856,9 @@ const CardTransaction = (props) => (
               borderRadius: 10,
               fontSize: 12,
             }}
-            onPress={
+            onPress={ 
               props.status === 'Pending' || props.status === 'Processing'
-                ? props.cancel
+                ? props.cancelOrder
                 : null
             }
           >
@@ -970,7 +970,7 @@ const LoadTransact = (props) => {
         <CardTransaction
           key={i}
           id={d[1].id}
-          item={d[1].items.length}
+          item={d[1].items?.length??0}
           status={d[1].status}
           total={d[1].totalprice}
           date={
@@ -984,6 +984,16 @@ const LoadTransact = (props) => {
                 keyid: d[0],
                 what: props.transaction ? 'transaction' : 'reservation',
                 ...d[1],
+              },
+            })
+          }
+          cancelOrder={() =>
+            props.navigation.navigate('Transaction', {
+              data: {
+                keyid: d[0],
+                what: props.transaction ? 'transaction' : 'reservation',
+                ...d[1],
+                cancelStatus: true
               },
             })
           }

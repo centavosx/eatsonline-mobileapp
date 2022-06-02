@@ -1,5 +1,5 @@
 import { useFocusEffect } from '@react-navigation/native'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   Image,
+  TextInput
 } from 'react-native'
 import { Picker } from '@react-native-picker/picker'
 import * as ImagePicker from 'expo-image-picker'
@@ -18,7 +19,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { decrypt, decryptJSON, encrypt, encryptJSON } from '../../Encryption'
 import axios from 'axios'
 import { dataFire, storage } from '../../firebase/firebasecon'
+
 const Transaction = ({ navigation, route }) => {
+  const ref = useRef()
+  const [cancelOrder, setCancelOrder] = useState(false)
+  const [reason, setReason] = useState('');
   const [data, setData] = useState({})
   const [bankorgcash, setBankOrGcash] = useState('gcash')
   const [bank, setBank] = useState({})
@@ -30,6 +35,13 @@ const Transaction = ({ navigation, route }) => {
       setSent({})
       setImage(false)
       getData()
+      if(route.params.data.cancelStatus){
+        setCancelOrder(true)
+        scrollToBottom();
+      } 
+       else{
+         setCancelOrder(false)
+      }
     }, [])
   )
   const pickImage = async () => {
@@ -159,13 +171,17 @@ const Transaction = ({ navigation, route }) => {
     }
   }, [sent])
 
+  function scrollToBottom(){
+    ref.current.scrollToEnd({animated: true});
+  }
+
   return (
     <SafeAreaView style={{ backgroundColor: '#d6faf4', flex: 1 }}>
       <View style={styles.header}>
         <Icon name="arrow-back-ios" size={28} onPress={navigation.goBack} />
         <Text style={{ fontSize: 20, fontWeight: 'bold' }}>Transaction</Text>
       </View>
-      <ScrollView>
+      <ScrollView ref={ref}>
         <View
           style={{
             backgroundColor: 'white',
@@ -620,6 +636,140 @@ const Transaction = ({ navigation, route }) => {
                 ) : null}
               </CurveDiv>
             ) : null}
+
+            {cancelOrder ? 
+              <CurveDiv>
+              <IconAndText
+                text="Do you want to cancel your order?"
+                style={{
+                  flexDirection: 'row',
+                  paddingTop: 11,
+                  left: -8,
+                  marginBottom: 11,
+                }}
+                weight="bold"
+                fontsize={16}
+                image={require('../../assets/message.png')}
+              />
+              <IconAndText
+                fontsize={12}
+                style={{ flexDirection: 'row', paddingTop: 1 }}
+                weight="normal"
+                text="Please select reason"
+              />
+              <Picker
+                      selectedValue={reason}
+                      style={{
+                        width: '100%', 
+                        fontSize: '12',
+                        marginLeft: 10,
+                        marginRight: 10,
+                        
+                      }}
+                      onValueChange={(itemValue) =>
+                        setReason(itemValue)
+                      }
+                    >
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Want to change payment method"
+                        value="Want to change payment method"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Change/Combine order"
+                        value="Change/Combine order"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Delivery time is too long"
+                        value="Delivery time is too long"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Duplicate order"
+                        value="Duplicate order"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Request refund"
+                        value="Request refund"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Change of mind"
+                        value="Change of mind"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Decided for alternative product"
+                        value="Decided for alternative product"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Fees-shipping cost"
+                        value="Fees-shipping cost"
+                      />
+                      <Picker.Item
+                        style={{ fontSize: 12 }}
+                        label="Others"
+                        value="Others"
+                      />
+
+              </Picker>
+              {reason === "Others" || reason === "Request refund"?
+                <View>
+                  <TextInput 
+                    placeholder="Enter your reason"
+                    placeholderTextColor="#000000"
+                    style={{
+                      flex: 1,
+                      paddingLeft: 8,
+                      color: '#000000',
+                      fontSize: 12,
+                      marginBottom: 20,
+                      marginTop: 10,
+                      borderColor: 'red',
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      marginLeft: 10,
+                      marginRight: 10
+                    }}
+                    multiline={true}
+                    autoCapitalize="none"
+                    // onChangeText={(val) => setMessage(val)}
+                  />
+                </View>
+                : null}
+                { reason != "" ? 
+                <TouchableOpacity
+                style={{
+                  backgroundColor: 'yellow',
+                  width: '70%',
+                  marginHorizontal: '15%',
+                  height: 40,
+                  padding: 10,
+                  marginBottom: 10,
+                }}
+                onPress={() => Cancel()}
+              >
+              <Text
+                style={{
+                color: 'black',
+                fontWeight: 'bold',
+                fontSize: 16,
+                textAlign: 'center',
+              }}
+            >
+              Confirm
+            </Text>
+          </TouchableOpacity> : null
+
+                }
+            </CurveDiv> : null  
+            }
+            
+
           </View>
         </View>
       </ScrollView>
@@ -634,6 +784,31 @@ const Transaction = ({ navigation, route }) => {
         }}
       >
         <TouchableOpacity
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor:
+            cancelOrder
+                ? 'grey'
+                : 'red',
+            borderRadius: 20,
+            padding: 8,
+          }}
+          onPress={() => {setCancelOrder(!cancelOrder); scrollToBottom() }}
+        >
+          <Text
+            style={{
+              textAlign: 'center',
+              fontSize: 28,
+              fontWeight: 'bold',
+              color: 'white',
+            }}
+          >
+            Cancel Order
+          </Text>
+        </TouchableOpacity>
+
+        {/* <TouchableOpacity
           style={{
             width: '100%',
             height: '100%',
@@ -660,7 +835,8 @@ const Transaction = ({ navigation, route }) => {
           >
             Cancel Order
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+
       </View>
     </SafeAreaView>
   )
